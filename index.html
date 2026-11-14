@@ -7,19 +7,37 @@
 <meta name="referrer" content="no-referrer">
 <title>عمق العقارية</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #F3F6F6; }
+  html, body { margin: 0; height: 100%; background: #F3F6F6; font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; color: #1E3A47; }
   iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+  #fb { display: none; position: fixed; inset: 0; z-index: 2; background: rgba(243, 246, 246, .96); align-items: center; justify-content: center; padding: 16px; }
+  #fb.on { display: flex; }
+  #fb .c { background: #fff; border: 1px solid #DCE5E8; border-radius: 14px; padding: 28px; max-width: 460px; width: 100%; text-align: center; line-height: 1.8; }
+  #fb h1 { margin: 0 0 10px; font-size: 20px; }
+  #fb p { margin: 0 0 18px; color: #5F7480; font-size: 15px; }
+  #fb a.b { display: block; background: #247B73; color: #fff; text-decoration: none; font-weight: 600; padding: 13px 20px; border-radius: 10px; }
+  #fb button { margin-top: 12px; background: none; border: 0; color: #5F7480; cursor: pointer; font: inherit; font-size: 14px; text-decoration: underline; }
 </style>
 </head>
 <body>
 <iframe id="app" title="عمق العقارية" allow="clipboard-write"></iframe>
+<div id="fb" role="alert">
+  <div class="c">
+    <h1>تعذّر عرض الصفحة داخل هذا المتصفح</h1>
+    <p>قد يكون حساب Google غير مسجَّل الدخول في هذا المتصفح، أو أنه يمنع ملفات تعريف الارتباط لجهات خارجية. افتح الرابط الرسمي (سيظهر فيه شريط Google).</p>
+    <a class="b" id="fbLink" target="_top" rel="noopener">فتح الرابط الرسمي</a>
+    <button type="button" id="fbClose">متابعة الانتظار</button>
+  </div>
+</div>
 <script>
 /* صفحة الغلاف: تعرض البوابة داخل إطار حتى لا يظهر شريط Google، ثم تعرض التطبيق الذي ترسله البوابة.
-   PORTAL = رابط نشر البوابة (exec). الرابط يقبل ?m=pay أو ?m=main و&id=رقم الاستمارة كما في البوابة. */
+   PORTAL = رابط نشر البوابة (exec). الرابط يقبل ?m=pay أو ?m=main و&id=رقم الاستمارة كما في البوابة.
+   OFFICIAL = الرابط الرسمي للبوابة (بلا تضمين) يُعرض كمخرج إن لم تصل رسالة «ready» من البوابة خلال مدة الانتظار. */
 var PORTAL = 'https://script.google.com/macros/s/AKfycbyeZHvAXK-rIe9Dl3XBg3dHJB1Dr2hmlUztwibulpVsQxvPBCszE5Y-ze0Qc9LzfieH/exec';
+var OFFICIAL = 'https://script.google.com/macros/s/AKfycbzkPixH6QvnJsOEwbVNRL-KD6UIPaw_-vUD7aNM0HjiDYyu_ZwX6N3Ki0m1b4QH1C1a/exec';
+var WAIT_MS = 15000;
 var APPS = 'https://script.google.com/macros/s/';
 var SANDBOX = /^https:\/\/n-[a-z0-9-]+-script\.googleusercontent\.com$/;
-var frame = document.getElementById('app');
+var frame = document.getElementById('app'), fb = document.getElementById('fb'), timer = null;
 
 /* رابط استمارة مباشر يأتي من تطبيق الصرف في الجزء بعد # (لا يُرسل إلى الخادم)، ويُزال من شريط العنوان بعد قراءته. */
 var direct = '';
@@ -30,16 +48,22 @@ if (location.hash.indexOf('#f=') === 0) {
 if (direct.indexOf(APPS) === 0) {
   frame.src = direct;
 } else {
-  var q = new URLSearchParams(location.search), p = new URLSearchParams();
+  var q = new URLSearchParams(location.search), p = new URLSearchParams(), o = new URLSearchParams();
   p.set('embed', '1');
-  ['m', 'id'].forEach(function (k) { if (q.get(k)) p.set(k, q.get(k)); });
+  ['m', 'id'].forEach(function (k) { if (q.get(k)) { p.set(k, q.get(k)); o.set(k, q.get(k)); } });
   frame.src = PORTAL + '?' + p.toString();
+  document.getElementById('fbLink').href = OFFICIAL + (o.toString() ? '?' + o.toString() : '');
+  timer = setTimeout(function () { fb.classList.add('on'); }, WAIT_MS);
 }
+document.getElementById('fbClose').addEventListener('click', function () { fb.classList.remove('on'); });
 
 window.addEventListener('message', function (e) {
   var d = e.data;
-  if (!SANDBOX.test(e.origin) || !d || d.omq !== 'open') return;
+  if (!SANDBOX.test(e.origin) || !d) return;
+  if (d.omq === 'ready') { clearTimeout(timer); fb.classList.remove('on'); return; }
+  if (d.omq !== 'open') return;
   if (typeof d.url !== 'string' || d.url.indexOf(APPS) !== 0) return;
+  clearTimeout(timer); fb.classList.remove('on');
   frame.src = d.url;
 });
 </script>
