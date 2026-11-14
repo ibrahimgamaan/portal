@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>عمق العقارية</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #F3F6F6; }
+  iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+</style>
+</head>
+<body>
+<iframe id="app" title="عمق العقارية" allow="clipboard-write"></iframe>
+<script>
+/* صفحة الغلاف: تعرض البوابة داخل إطار حتى لا يظهر شريط Google، ثم تعرض التطبيق الذي ترسله البوابة.
+   PORTAL = رابط نشر البوابة (exec). الرابط يقبل ?m=pay أو ?m=main و&id=رقم الاستمارة كما في البوابة. */
+var PORTAL = 'https://script.google.com/macros/s/AKfycbyeZHvAXK-rIe9Dl3XBg3dHJB1Dr2hmlUztwibulpVsQxvPBCszE5Y-ze0Qc9LzfieH/exec';
+var APPS = 'https://script.google.com/macros/s/';
+var SANDBOX = /^https:\/\/n-[a-z0-9-]+-script\.googleusercontent\.com$/;
+var frame = document.getElementById('app');
+
+var q = new URLSearchParams(location.search), p = new URLSearchParams();
+p.set('embed', '1');
+['m', 'id'].forEach(function (k) { if (q.get(k)) p.set(k, q.get(k)); });
+frame.src = PORTAL + '?' + p.toString();
+
+window.addEventListener('message', function (e) {
+  var d = e.data;
+  if (!SANDBOX.test(e.origin) || !d || d.omq !== 'open') return;
+  if (typeof d.url !== 'string' || d.url.indexOf(APPS) !== 0) return;
+  frame.src = d.url;
+});
+</script>
+</body>
+</html>
