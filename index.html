@@ -21,10 +21,20 @@ var APPS = 'https://script.google.com/macros/s/';
 var SANDBOX = /^https:\/\/n-[a-z0-9-]+-script\.googleusercontent\.com$/;
 var frame = document.getElementById('app');
 
-var q = new URLSearchParams(location.search), p = new URLSearchParams();
-p.set('embed', '1');
-['m', 'id'].forEach(function (k) { if (q.get(k)) p.set(k, q.get(k)); });
-frame.src = PORTAL + '?' + p.toString();
+/* رابط استمارة مباشر يأتي من تطبيق الصرف في الجزء بعد # (لا يُرسل إلى الخادم)، ويُزال من شريط العنوان بعد قراءته. */
+var direct = '';
+if (location.hash.indexOf('#f=') === 0) {
+  try { direct = decodeURIComponent(location.hash.slice(3)); } catch (e) { direct = ''; }
+  history.replaceState(null, '', location.pathname);
+}
+if (direct.indexOf(APPS) === 0) {
+  frame.src = direct;
+} else {
+  var q = new URLSearchParams(location.search), p = new URLSearchParams();
+  p.set('embed', '1');
+  ['m', 'id'].forEach(function (k) { if (q.get(k)) p.set(k, q.get(k)); });
+  frame.src = PORTAL + '?' + p.toString();
+}
 
 window.addEventListener('message', function (e) {
   var d = e.data;
