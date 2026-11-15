@@ -451,6 +451,7 @@ function catForm(id) {
 
 /* ============ تصدير واستيراد ============ */
 function download(name, text, mime) {
+  if (window.AndroidBridge) { AndroidBridge.save(name, mime, text); return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type: mime})); a.download = name; document.body.append(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
@@ -481,7 +482,7 @@ document.addEventListener('click', e => {
     case 'save': saveForm(false); break;
     case 'saveMore': saveForm(true); break;
     case 'del': delTx(F.id); break;
-    case 'print': window.print(); break;
+    case 'print': window.AndroidBridge ? AndroidBridge.print() : window.print(); break;
     case 'csv': csv(S.d.tx, `masrouf-${stamp()}.csv`); break;
     case 'csvp': csv(S.d.tx.filter(t => inPeriod(t, S.rep.mode, S.rep.ref)), `masrouf-report-${stamp()}.csv`); break;
     case 'backup': download(`masrouf-backup-${stamp()}.json`, JSON.stringify(S.d), 'application/json'); toast('تم حفظ النسخة الاحتياطية'); break;
