@@ -81,13 +81,17 @@ small{font-weight:500}
 .leg .h b{flex:1;font-weight:500}.leg .h span{color:var(--mute);font-size:12px}
 .leg .h strong{font-weight:700}
 .leg .bar{height:6px;margin:0}
-.bars{display:flex;align-items:flex-end;gap:3px;height:150px;padding-top:10px}
-.bars .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0}
-.bars .c i{width:100%;max-width:26px;background:linear-gradient(180deg,var(--pri2),var(--pri));border-radius:6px 6px 2px 2px;min-height:2px}
-.bars .c.z i{background:var(--line)}
-.bars .c.hi i{background:linear-gradient(180deg,#fb7185,#e11d48)}
-.bars .c u{font-size:10px;color:var(--mute);text-decoration:none;margin-top:4px;height:14px}
-.bars .c s{font-size:9.5px;color:var(--mute);text-decoration:none;white-space:nowrap;margin-bottom:2px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:160px;padding-top:12px}
+.bars .c{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;min-width:0;cursor:pointer}
+.bars .bw{flex:1;min-height:0;width:100%;position:relative}
+.bars .bw i{position:absolute;bottom:0;inset-inline:0;margin:auto;width:100%;max-width:26px;background:linear-gradient(180deg,var(--pri2),var(--pri));border-radius:6px 6px 2px 2px}
+.bars .c.z .bw i{background:var(--line)}
+.bars .c.hi .bw i{background:linear-gradient(180deg,#fb7185,#e11d48)}
+.bars .c.sel .bw i{outline:2px solid var(--ink);outline-offset:1px}
+.bars .pv{position:absolute;inset-inline:0;margin:auto;width:100%;max-width:26px;height:3px;border-radius:2px;background:var(--mute);opacity:.7}
+.bars .c u{font-size:10px;color:var(--mute);text-decoration:none;margin-top:4px;height:14px;white-space:nowrap}
+.bars .c s{position:absolute;inset-inline:-4px;text-align:center;font-size:9.5px;color:var(--mute);text-decoration:none;white-space:nowrap}
+.tipline{text-align:center;color:var(--mute);font-size:12.5px;margin-top:8px;min-height:20px}
 .fab{position:fixed;bottom:calc(30px + env(safe-area-inset-bottom));inset-inline-start:50%;transform:translateX(50%);width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-size:34px;line-height:1;box-shadow:0 8px 22px rgba(15,118,110,.45);z-index:30;display:grid;place-items:center;border:4px solid var(--bg)}
 .fab:active{transform:translateX(50%) scale(.94)}
 .tabs{position:fixed;bottom:0;inset-inline:0;z-index:25;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
@@ -148,6 +152,11 @@ input:focus,select:focus{border-color:var(--pri)}
 .gbtn .chev{margin-inline-start:auto;display:grid;transition:transform .2s}.gbtn .chev.up{transform:rotate(180deg)}
 .allbtn{display:flex;align-items:center;gap:6px;margin:4px 2px 2px}
 .gh svg,.leg .h svg{flex:none}.leg .h svg{width:17px;height:17px}
+.ring{position:absolute;inset-inline-end:18px;top:20px;width:68px;height:68px;z-index:1}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}.ring circle{stroke:rgba(255,255,255,.22)}.ring circle.fg{stroke:#fff;transition:stroke-dasharray .6s}
+.ring.warn circle.fg{stroke:#fcd34d}.ring.bad circle.fg{stroke:#fda4af}.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.st{background:var(--bg);border-radius:13px;padding:10px 12px}.st span{display:block;font-size:12px;color:var(--mute)}.st b{display:block;font-size:14.5px;margin-top:1px}.st em{font-style:normal;font-size:12px;color:var(--mute)}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -307,7 +316,9 @@ function toast(msg, undo) {
 }
 
 /* ============ فلترة الفترات ============ */
+function weekStart(ref) { const d = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate()); d.setDate(d.getDate() - (d.getDay() + 1) % 7); return d; }
 function inPeriod(t, mode, ref) {
+  if (mode === 'week') { const a = ymd(weekStart(ref)), e = new Date(weekStart(ref)); e.setDate(e.getDate() + 6); return t.date >= a && t.date <= ymd(e); }
   const y = ref.getFullYear(), m = pad(ref.getMonth() + 1);
   if (mode === 'day') return t.date === ymd(ref);
   if (mode === 'month') return t.date.startsWith(`${y}-${m}`);
@@ -316,6 +327,7 @@ function inPeriod(t, mode, ref) {
 function shift(mode, ref, k) {
   const d = new Date(ref);
   if (mode === 'day') d.setDate(d.getDate() + k);
+  else if (mode === 'week') d.setDate(d.getDate() + 7 * k);
   else if (mode === 'month') { d.setDate(1); d.setMonth(d.getMonth() + k); }
   else { d.setDate(1); d.setFullYear(d.getFullYear() + k); }
   return d;
@@ -343,10 +355,22 @@ function donut(items, total, label) {
   return `<div class="donut"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--line)" stroke-width="6"/>${segs}</svg>
     <div class="c"><div><b class="m">${num(total, 0)}</b>${label}</div></div></div>`;
 }
-function bars(vals, labels, hiIdx, showVals) {
-  const max = Math.max(...vals, 1);
-  return `<div class="bars">${vals.map((v, i) => `<div class="c ${v === 0 ? 'z' : ''} ${i === hiIdx && v > 0 ? 'hi' : ''}" title="${labels[i]}: ${num(v)}">
-    ${showVals && v > 0 ? `<s>${num(v, 0)}</s>` : ''}<i style="height:${Math.max(v / max * 100 - (showVals ? 14 : 8), 1.5)}%"></i><u>${labels[i]}</u></div>`).join('')}</div>`;
+function bars(vals, labels, hiIdx, showVals, prev, tips) {
+  const max = Math.max(...vals, ...(prev || []), 1);
+  const col = vals.map((v, i) => { const h = v / max * 86, pv = prev && prev[i] ? prev[i] / max * 86 : 0;
+    return `<div class="c ${v === 0 ? 'z' : ''} ${i === hiIdx && v > 0 ? 'hi' : ''}" data-tip="${esc(tips ? tips[i] : labels[i])}: ${num(v)} ${esc(S.d.set.cur)}">
+    <div class="bw">${showVals && v > 0 ? `<s style="bottom:calc(${h}% + 2px)">${num(v, 0)}</s>` : ''}<i style="height:${Math.max(h, 1.5)}%"></i>${pv ? `<b class="pv" style="bottom:${pv}%"></b>` : ''}</div><u>${labels[i]}</u></div>`; }).join('');
+  return `<div class="bars">${col}</div><div class="tipline" id="tipline">اضغط على أي عمود لعرض التفاصيل${prev ? ' · الخط الرمادي = الفترة السابقة' : ''}</div>`;
+}
+function series(mode, ref, list) {
+  const ex = list.filter(t => t.type === 'exp');
+  if (mode === 'month') { const n = daysIn(ref), v = Array(n).fill(0); ex.forEach(t => v[+t.date.slice(8) - 1] += t.amount);
+    return {v, lab: v.map((_, i) => i % 5 === 0 || i === n - 1 ? dg(i + 1) : ''), tip: v.map((_, i) => `${dg(i + 1)} ${MONTHS[ref.getMonth()]}`)}; }
+  if (mode === 'year') { const v = Array(12).fill(0); ex.forEach(t => v[+t.date.slice(5, 7) - 1] += t.amount);
+    return {v, lab: MONTHS.map(m => m.slice(0, 3)), tip: MONTHS.slice()}; }
+  const st = weekStart(ref), v = Array(7).fill(0); ex.forEach(t => { const i = Math.round((parse(t.date) - st) / 864e5); if (i >= 0 && i < 7) v[i] += t.amount; });
+  const dn = i => DAYS[(st.getDay() + i) % 7];
+  return {v, lab: v.map((_, i) => dn(i).replace('ال', '').slice(0, 3)), tip: v.map((_, i) => { const d = new Date(st); d.setDate(d.getDate() + i); return `${dn(i)} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`; })};
 }
 const pctBadge = (cur, prev) => {
   if (!prev) return '';
@@ -364,6 +388,26 @@ function pendingCard() {
     <div class="pb"><button class="ok" data-act="pok" data-id="${x.id}">تأكيد</button><button data-act="pedit" data-id="${x.id}">تعديل</button><button class="no" data-act="pno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}
     ${p.length > 1 ? '<button class="link" data-act="pall" style="margin-top:2px">تأكيد الكل</button>' : ''}</section>`;
 }
+function homeInsights(tx, now) {
+  const days = [], vals = [], lab = [], tips = [];
+  for (let i = 6; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i), k = ymd(d);
+    days.push(k); vals.push(sum(tx.filter(t => t.date === k))); lab.push(DAYS[d.getDay()].replace('ال', '').slice(0, 3)); tips.push(`${DAYS[d.getDay()]} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`); }
+  if (!vals.some(v => v > 0)) return '';
+  const mo = tx.filter(t => t.type === 'exp' && inPeriod(t, 'month', now));
+  const byDay = {}, byNote = {};
+  mo.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + t.amount; if (t.note) byNote[t.note] = (byNote[t.note] || 0) + t.amount; });
+  const top = o => Object.entries(o).sort((a, b) => b[1] - a[1])[0];
+  const td = top(byDay), tn = top(byNote), st = (l, v, sub) => `<div class="st"><span>${l}</span><b>${v}</b>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  return `<section class="card"><h3>آخر 7 أيام</h3>${bars(vals, lab, -1, false, null, tips)}
+    <div class="stats">${td ? st('أكثر يوم صرفاً', dayLabel(td[0]).replace('اليوم · ', '').replace('أمس · ', '').split(' ').slice(0, 3).join(' '), num(td[1], 0) + ' ' + esc(S.d.set.cur)) : ''}${tn ? st('أكثر بند صرفاً', esc(tn[0].length > 16 ? tn[0].slice(0, 16) + '…' : tn[0]), num(tn[1], 0) + ' ' + esc(S.d.set.cur)) : ''}</div></section>`;
+}
+function budgetCheck() {
+  const set = S.d.set; if (!(set.budget > 0)) return;
+  const now = new Date(), key = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`, p = sum(S.d.tx.filter(t => inPeriod(t, 'month', now))) / set.budget * 100;
+  set.al = set.al || {};
+  if (p >= 100 && set.al.b100 !== key) { set.al.b100 = key; set.al.b80 = key; save(); toast('⚠️ تجاوزت ميزانية هذا الشهر'); }
+  else if (p >= 80 && set.al.b80 !== key) { set.al.b80 = key; save(); toast('تنبيه: صرفت ' + dg(Math.round(p)) + '% من ميزانية الشهر'); }
+}
 function viewHome() {
   const now = new Date(), tx = S.d.tx, set = S.d.set;
   if (!tx.length && S.d.pending.length) return pendingCard();
@@ -378,7 +422,7 @@ function viewHome() {
   if (set.budget > 0) {
     const p = spent / set.budget * 100, cls = p >= 100 ? 'bad' : p >= 80 ? 'warn' : 'ok';
     const left = set.budget - spent, perDay = left / Math.max(dim - dom + 1, 1);
-    budgetHtml = `<div class="bar ${cls}"><i style="width:${Math.min(p, 100)}%"></i></div>
+    budgetHtml = `<div class="ring ${cls}"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke-width="3.6"/><circle class="fg" cx="18" cy="18" r="15.9" fill="none" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="${Math.min(p, 100)} 100"/></svg><b>${dg(Math.round(p))}%</b></div>
       <div class="hint">${left >= 0 ? `المتبقي من الميزانية ${num(left, 0)} ${esc(set.cur)} · يمكنك صرف ${num(perDay, 0)} يومياً` : `تجاوزت الميزانية بمقدار ${num(-left, 0)} ${esc(set.cur)}`}</div>`;
   } else budgetHtml = `<div class="hint">المتوسط اليومي ${num(spent / dom, 0)} ${esc(set.cur)} · التوقع لنهاية الشهر ${num(proj, 0)}</div>`;
   const cats = groupByCat(mo).slice(0, 4), tot = spent || 1;
@@ -386,6 +430,7 @@ function viewHome() {
   return `${pendingCard()}<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
     <div class="big m">${num(spent)} <small>${esc(set.cur)}</small></div>${budgetHtml}
     <div class="row" style="margin-top:12px"><div class="mini">اليوم<b>${num(today, 0)}</b></div><div class="mini">الدخل<b>${num(inc, 0)}</b></div><div class="mini">الصافي<b>${num(inc - spent, 0)}</b></div></div></section>
+    ${homeInsights(tx, now)}
     ${cats.length ? `<section class="card"><h3>أكثر الفئات صرفاً هذا الشهر <a data-tab="rep">التفاصيل</a></h3><div class="leg">${cats.map(c => `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${I(c.icon)} ${esc(c.name)}</b><strong>${money(c.v)}</strong></div><div class="bar"><i style="width:${c.v / tot * 100}%;background:${c.color}"></i></div></div>`).join('')}</div></section>` : ''}
     <section><div class="day"><span>آخر العمليات</span><a class="link" data-tab="log">عرض الكل</a></div>${recent.map(txRow).join('')}</section>`;
 }
@@ -408,32 +453,30 @@ function viewRep() {
   const {mode, ref} = S.rep, set = S.d.set, tx = S.d.tx;
   const cur = tx.filter(t => inPeriod(t, mode, ref)), prev = tx.filter(t => inPeriod(t, mode, shift(mode, ref, -1)));
   const spent = sum(cur), inc = sum(cur, 'inc'), pspent = sum(prev);
-  const title = mode === 'day' ? dayLabel(ymd(ref)) : mode === 'month' ? monthLabel(ref) : `سنة ${dg(ref.getFullYear())}`;
-  const sub = mode === 'day' ? '' : mode === 'month' ? `${dg(daysIn(ref))} يوماً` : '١٢ شهراً'.replace(/[١٢]/g, d => dg(d === '١' ? 1 : 2));
+  const wk = weekStart(ref), we = new Date(wk); we.setDate(we.getDate() + 6);
+  const title = mode === 'day' ? dayLabel(ymd(ref)) : mode === 'week' ? `${dg(wk.getDate())} ${MONTHS[wk.getMonth()]} – ${dg(we.getDate())} ${MONTHS[we.getMonth()]}` : mode === 'month' ? monthLabel(ref) : `سنة ${dg(ref.getFullYear())}`;
+  const sub = mode === 'day' ? '' : mode === 'week' ? `أسبوع ${dg(we.getFullYear())}` : mode === 'month' ? `${dg(daysIn(ref))} يوماً` : '١٢ شهراً'.replace(/[١٢]/g, d => dg(d === '١' ? 1 : 2));
   const exps = cur.filter(t => t.type === 'exp');
   const cats = groupByCat(cur), by = S.rep.by || 'cat';
   const gm = {}; cats.forEach(c => { const g = c.group || 'other'; (gm[g] ||= {v: 0, items: []}); gm[g].v += c.v; gm[g].items.push(c); });
   const gs = GROUPS.filter(g => gm[g.id]).map(g => ({...g, v: gm[g.id].v, items: gm[g.id].items})).sort((a, b) => b.v - a.v);
   // مخطط الأعمدة
   let chart = '', avgLabel = '', avg = 0;
-  if (mode === 'month') {
-    const n = daysIn(ref), v = Array(n).fill(0);
-    exps.forEach(t => v[+t.date.slice(8) - 1] += t.amount);
-    const isNow = ref.getFullYear() === new Date().getFullYear() && ref.getMonth() === new Date().getMonth();
-    const elapsed = isNow ? new Date().getDate() : n;
-    avg = spent / elapsed; avgLabel = 'متوسط الصرف اليومي';
-    chart = bars(v, v.map((_, i) => i % 5 === 0 || i === n - 1 ? dg(i + 1) : ''), v.indexOf(Math.max(...v)), false);
-  } else if (mode === 'year') {
-    const v = Array(12).fill(0);
-    exps.forEach(t => v[+t.date.slice(5, 7) - 1] += t.amount);
-    const active = v.filter(x => x > 0).length || 1;
-    avg = spent / active; avgLabel = 'متوسط الصرف الشهري';
-    chart = bars(v, MONTHS.map(m => m.slice(0, 3)), v.indexOf(Math.max(...v)), true);
-  } else { avg = spent / (exps.length || 1); avgLabel = 'متوسط العملية'; }
+  if (mode === 'day') { avg = spent / (exps.length || 1); avgLabel = 'متوسط العملية'; }
+  else {
+    const sr = series(mode, ref, cur), pr = series(mode, shift(mode, ref, -1), prev), now = new Date();
+    const mx = Math.max(...sr.v);
+    chart = bars(sr.v, sr.lab, sr.v.indexOf(mx), mode === 'year', pr.v, sr.tip);
+    if (mode === 'year') { avg = spent / (sr.v.filter(x => x > 0).length || 1); avgLabel = 'متوسط الصرف الشهري'; }
+    else { const cm = mode === 'month' && ref.getFullYear() === now.getFullYear() && ref.getMonth() === now.getMonth();
+      const cw = mode === 'week' && ymd(weekStart(ref)) === ymd(weekStart(now));
+      const el = cm ? now.getDate() : cw ? Math.round((parse(todayStr()) - weekStart(now)) / 864e5) + 1 : sr.v.length;
+      avg = spent / el; avgLabel = 'متوسط الصرف اليومي'; }
+  }
   const biggest = [...exps].sort((a, b) => b.amount - a.amount).slice(0, 5);
   const kpi = (l, v, extra = '') => `<div class="kpi"><span>${l}</span><b>${v}</b>${extra}</div>`;
   return `<div class="printhead"><h2>تقرير المصاريف · ${title}</h2><p>تاريخ الإصدار ${dayLabel(todayStr())}</p></div>
-    <div class="seg noprint">${[['day','يومي'],['month','شهري'],['year','سنوي']].map(([k, l]) => `<button data-mode="${k}" class="${mode === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="seg noprint">${[['day','يومي'],['week','أسبوعي'],['month','شهري'],['year','سنوي']].map(([k, l]) => `<button data-mode="${k}" class="${mode === k ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div class="nav"><button data-shift="1" aria-label="التالي">›</button><div class="lb">${title}<small>${sub}</small></div><button data-shift="-1" aria-label="السابق">‹</button></div>
     ${!cur.length ? '<div class="card empty"><div class="e">📭</div><h3>لا توجد عمليات في هذه الفترة</h3></div>' : `
     <div class="grid2">${kpi('إجمالي المصروفات', money(spent), pctBadge(spent, pspent))}${kpi('إجمالي الدخل', money(inc))}
@@ -443,7 +486,7 @@ function viewRep() {
       <div class="leg">${by === 'group' ? gs.map(g => `<div class="it"><div class="h"><i class="dot" style="background:${g.color}"></i><b>${I(g.icon)} ${esc(g.name)}</b><span>${dg((g.v / spent * 100).toFixed(0))}%</span><strong>${money(g.v)}</strong></div><div class="bar"><i style="width:${g.v / gs[0].v * 100}%;background:${g.color}"></i></div>${g.items.map(c => `<div class="sub"><span>${I(c.icon)} ${esc(c.name)}</span><span>${num(c.v, 0)}</span></div>`).join('')}</div>`).join('') : cats.map(c => { const b = mode === 'month' && c.budget > 0 ? c.budget : 0, bp = b ? c.v / b * 100 : 0;
         return `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${I(c.icon)} ${esc(c.name)}</b><span>${dg((c.v / spent * 100).toFixed(0))}%</span><strong>${money(c.v)}</strong></div>
         <div class="bar ${bp >= 100 ? 'bad' : bp >= 80 ? 'warn' : ''}"><i style="width:${b ? Math.min(bp, 100) : c.v / cats[0].v * 100}%;background:${bp >= 100 ? '' : c.color}"></i></div>${b ? `<span class="hint">الميزانية ${num(b, 0)} · ${bp >= 100 ? 'تجاوزتها' : 'المتبقي ' + num(b - c.v, 0)}</span>` : ''}</div>`; }).join('')}</div></div></section>` : ''}
-    ${chart ? `<section class="card"><h3>${mode === 'month' ? 'المصروف اليومي' : 'المصروف الشهري'}</h3>${chart}</section>` : ''}
+    ${chart ? `<section class="card"><h3>${mode === 'year' ? 'المصروف الشهري' : 'المصروف اليومي'}</h3>${chart}</section>` : ''}
     ${biggest.length ? `<section><div class="day"><span>أكبر ${dg(biggest.length)} مصروفات</span></div>${biggest.map(txRow).join('')}</section>` : ''}
     <div class="btns noprint"><button class="btn p" data-act="print">🖨️ طباعة / حفظ PDF</button><button class="btn" data-act="csvp">⬇️ تصدير Excel</button></div>`}`;
 }
@@ -561,6 +604,7 @@ function saveForm(more) {
   if (F.pid) { S.d.pending = S.d.pending.filter(x => x.id !== F.pid); learn(F.merchant, rec.cat); }
   save(); render();
   if (more) { openForm(); toast('تم الحفظ ✓'); } else { closeSheet(); toast('تم الحفظ ✓'); }
+  if (F.type === 'exp') setTimeout(budgetCheck, 2400);
 }
 function delTx(id) {
   const i = S.d.tx.findIndex(x => x.id === id), t = S.d.tx[i]; S.d.tx.splice(i, 1); save(); closeSheet(); render();
@@ -603,10 +647,11 @@ const stamp = () => todayStr();
 
 /* ============ الأحداث ============ */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by],[data-k],[data-g]'); if (!el) return;
+  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by],[data-k],[data-g],[data-tip]'); if (!el) return;
   const D = el.dataset;
   if (D.tab) { S.tab = D.tab; render(); scrollTo(0, 0); return; }
   if (D.k) { kp(D.k); return; }
+  if (D.tip) { const tl = $('#tipline'); if (tl) tl.textContent = D.tip; document.querySelectorAll('.bars .c').forEach(c => c.classList.toggle('sel', c === el)); return; }
   if (D.g) { F.open[D.g] = !(F.open[D.g] ?? S.d.cats.some(c => (c.group || 'other') === D.g && c.id === F.cat)); paintCats(); return; }
   if (D.by) { S.rep.by = D.by; render(); return; }
   if (D.mode) { S.rep.mode = D.mode; render(); return; }
@@ -752,11 +797,11 @@ function confirmPending(id, quiet) {
   const x = S.d.pending.find(y => y.id === id); if (!x) return;
   S.d.tx.push({id: uid(), ts: Date.now(), type: x.type, amount: x.amount, cat: x.cat, note: x.merchant || '', date: x.date, time: x.time});
   learn(x.merchant, x.cat); S.d.pending = S.d.pending.filter(y => y.id !== id); save(); render();
-  if (!quiet) toast('تم تسجيل العملية ✓');
+  if (!quiet) { toast('تم تسجيل العملية ✓'); setTimeout(budgetCheck, 2400); }
 }
 function pullSms() {
   if (!window.AndroidBridge) return;
-  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast(S.auto ? 'سُجّلت عملية من رسالة البنك 📩' : 'وصلت عملية جديدة للمراجعة 📩'); S.auto = 0; } } catch (e) {}
+  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast(S.auto ? 'سُجّلت عملية من رسالة البنك 📩' : 'وصلت عملية جديدة للمراجعة 📩'); S.auto = 0; setTimeout(budgetCheck, 2400); } } catch (e) {}
 }
 window.smsStatusChanged = () => { render(); pullSms(); };
 if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', pullSms); }
