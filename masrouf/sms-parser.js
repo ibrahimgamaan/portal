@@ -8,6 +8,13 @@
   const EXP = /(شراء|مشتريات|سحب|خصم|دفع|سداد|حوالة\s*صادرة|تحويل\s*صادر|حوالة\s*محلية|فاتورة|اشتراك|purchase|pos|withdraw|debit|paid|payment|sent|transfer\s*to)/i;
   const INC = /(إيداع|ايداع|حوالة\s*واردة|تحويل\s*وارد|راتب|استلام|استرداد|credit|deposit|received|refund|salary)/i;
   const CATS = [
+    ['ins', /(تأمين|تامين|التعاونية|بوبا|ميدغلف|insurance|tawuniya|bupa|medgulf|malath|ملاذ)/i],
+    ['charity', /(زكاة|زكاه|صدقة|صدقه|تبرع|جمعية|إحسان|احسان|وقف|ehsan|charity|donat|zakat|sadaqah|waqf)/i],
+    ['loan', /(قسط|أقساط|اقساط|تمويل|قرض|تابي|تمارا|installment|loan|finance|tabby|tamara|tasheel|تسهيل)/i],
+    ['subs', /(اشتراك|netflix|نتفلكس|شاهد|shahid|spotify|youtube\s*premium|anghami|osn|icloud|google\s*one|apple\.com\/bill|subscription|disney|prime video|chatgpt|openai)/i],
+    ['car', /(ورشة|ورشه|صيانة|صيانه|زيت|إطارات|اطارات|مغسلة|غسيل سيارات|فحص دوري|مركز خدمة|workshop|garage|tire|tyre|car\s*wash|auto\s*service|oil change|lube|motor|وكالة)/i],
+    ['travel', /(طيران|الخطوط|تذاكر|تذكرة|فندق|حجز|سياحة|تأشيرة|flynas|flyadeal|saudia|airlines|airline|booking\.com|hotel|airbnb|agoda|flight|tourism|visa fee|trip)/i],
+    ['care', /(صالون|حلاق|حلاقة|عطور|عطر|عناية|مستحضرات|salon|barber|spa\b|perfume|beauty|sephora|nice\s*one|نايس ون|cosmetic)/i],
     ['food', /(شاورما|شعبيات|مخبز|حلويات|فلافل|مشاوي|عصير|shawerma|shawarma|shabyat|folwat|bakery|sweets|juice|grill|rest(?:au|u)r|falafel|مطعم|مطاعم|كافيه|كوفي|قهوة|ستاربكس|برجر|بيتزا|هنقرستيشن|جاهز|كودو|هرفي|البيك|دومينوز|ماكدونالد|coffee|cafe|restaurant|kudu|herfy|albaik|starbucks|hungerstation|jahez|mcdonald|burger|dunkin|tim hortons)/i],
     ['groc', /(بنده|الدانوب|التميمي|نستو|كارفور|بقالة|سوبرماركت|هايبر|لولو|العثيم|panda|danube|tamimi|nesto|carrefour|lulu|othaim|grocery|supermarket|hyper)/i],
     ['trans', /(ساسكو|أدنوك|ادنوك|وقود|بنزين|محطة|الدريس|اوبر|أوبر|كريم|uber|careem|petrol|sasco|aldrees|fuel|parking|مواقف|بولت|bolt)/i],

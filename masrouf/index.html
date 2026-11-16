@@ -184,8 +184,16 @@ const DEF_CATS = [
   {id:'fun',name:'ترفيه',icon:'🎬',color:'#14b8a6'},
   {id:'gift',name:'هدايا ومناسبات',icon:'🎁',color:'#f43f5e'},
   {id:'fam',name:'الأسرة والأطفال',icon:'👨‍👩‍👧',color:'#a855f7'},
+  {id:'car',name:'السيارة وصيانتها',icon:'🚘',color:'#0369a1'},
+  {id:'subs',name:'اشتراكات رقمية',icon:'📺',color:'#7c3aed'},
+  {id:'loan',name:'أقساط وديون',icon:'💳',color:'#b45309'},
+  {id:'charity',name:'زكاة وصدقات',icon:'🤲',color:'#059669'},
+  {id:'travel',name:'سفر وسياحة',icon:'✈️',color:'#0891b2'},
+  {id:'care',name:'عناية شخصية',icon:'💇',color:'#db2777'},
+  {id:'ins',name:'تأمين',icon:'🛡️',color:'#475569'},
   {id:'other',name:'أخرى',icon:'📦',color:'#64748b'}
 ];
+const CATS_V2 = ['car','subs','loan','charity','travel','care','ins'];
 const INC_CATS = [
   {id:'salary',name:'راتب',icon:'💼',color:'#16a34a'},
   {id:'extra',name:'دخل إضافي',icon:'💰',color:'#0d9488'},
@@ -203,11 +211,19 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto'}
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto'}, migr: ['v2']
 });
+function migrate() {
+  S.d.migr = S.d.migr || [];
+  if (!S.d.migr.includes('v2')) {
+    CATS_V2.forEach(id => { if (!S.d.cats.some(c => c.id === id)) { const c = DEF_CATS.find(x => x.id === id), i = S.d.cats.findIndex(x => x.id === 'other');
+      S.d.cats.splice(i < 0 ? S.d.cats.length : i, 0, {...c, budget: 0}); } });
+    S.d.migr.push('v2');
+  }
+}
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date()}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
-  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && Array.isArray(r.tx)) { const d = defaults(); S.d = {...d, ...r, set: {...d.set, ...(r.set||{})}, cats: r.cats?.length ? r.cats : d.cats}; } } catch (e) {}
+  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && Array.isArray(r.tx)) { const d = defaults(); S.d = {...d, ...r, set: {...d.set, ...(r.set||{})}, cats: r.cats?.length ? r.cats : d.cats, migr: r.migr || []}; migrate(); save(); } } catch (e) {}
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S.d)); } catch (e) { toast('تعذّر الحفظ: مساحة التخزين ممتلئة أو ممنوعة'); } }
 function applyTheme() { document.documentElement.dataset.theme = S.d.set.theme; }
@@ -554,7 +570,7 @@ document.addEventListener('change', e => {
     r.onload = () => { try {
       const j = JSON.parse(r.result); if (!Array.isArray(j.tx)) throw 0;
       if (!confirm(`سيتم استبدال بياناتك الحالية بالنسخة التي تحتوي ${j.tx.length} عملية. متابعة؟`)) return;
-      S.d = {...defaults(), ...j, set: {...defaults().set, ...(j.set||{})}}; save(); applyTheme(); render(); toast('تم استرجاع النسخة الاحتياطية ✓');
+      S.d = {...defaults(), ...j, set: {...defaults().set, ...(j.set||{})}, migr: j.migr || []}; migrate(); save(); applyTheme(); render(); toast('تم استرجاع النسخة الاحتياطية ✓');
     } catch (err) { toast('الملف غير صالح'); } e.target.value = ''; };
     r.readAsText(e.target.files[0]);
   }
