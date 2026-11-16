@@ -8,7 +8,7 @@
   const EXP = /(شراء|مشتريات|سحب|خصم|دفع|سداد|حوالة\s*صادرة|تحويل\s*صادر|حوالة\s*محلية|فاتورة|اشتراك|purchase|pos|withdraw|debit|paid|payment|sent|transfer\s*to)/i;
   const INC = /(إيداع|ايداع|حوالة\s*واردة|تحويل\s*وارد|راتب|استلام|استرداد|credit|deposit|received|refund|salary)/i;
   const CATS = [
-    ['food', /(مطعم|مطاعم|كافيه|كوفي|قهوة|ستاربكس|برجر|بيتزا|هنقرستيشن|جاهز|كودو|هرفي|البيك|دومينوز|ماكدونالد|coffee|cafe|restaurant|kudu|herfy|albaik|starbucks|hungerstation|jahez|mcdonald|burger|dunkin|tim hortons)/i],
+    ['food', /(شاورما|شعبيات|مخبز|حلويات|فلافل|مشاوي|عصير|shawerma|shawarma|shabyat|folwat|bakery|sweets|juice|grill|rest(?:au|u)r|falafel|مطعم|مطاعم|كافيه|كوفي|قهوة|ستاربكس|برجر|بيتزا|هنقرستيشن|جاهز|كودو|هرفي|البيك|دومينوز|ماكدونالد|coffee|cafe|restaurant|kudu|herfy|albaik|starbucks|hungerstation|jahez|mcdonald|burger|dunkin|tim hortons)/i],
     ['groc', /(بنده|الدانوب|التميمي|نستو|كارفور|بقالة|سوبرماركت|هايبر|لولو|العثيم|panda|danube|tamimi|nesto|carrefour|lulu|othaim|grocery|supermarket|hyper)/i],
     ['trans', /(ساسكو|أدنوك|ادنوك|وقود|بنزين|محطة|الدريس|اوبر|أوبر|كريم|uber|careem|petrol|sasco|aldrees|fuel|parking|مواقف|بولت|bolt)/i],
     ['bills', /(stc|زين|موبايلي|سلام|كهرباء|مياه|السعودية للكهرباء|فاتورة|سداد|اتصالات|mobily|zain|salam|electric|water|nwc|sec\b|sadad)/i],
@@ -37,7 +37,7 @@
     const t = norm(body);
     if (!t || SKIP.test(t)) return null;
     // استبعاد جزء الرصيد حتى لا يُلتقط كمبلغ
-    const main = t.replace(/(?:الرصيد|رصيدك|رصيد|balance|bal|avl)[^\n]*/ig, ' ');
+    const main = t.replace(/(?:الرصيد|رصيدك|رصيد|balance|bal|avl|remaining\s*limit|available)[^\n]*/ig, ' ');
     let type = null;
     const e = main.search(EXP), i = main.search(INC);
     if (e >= 0 && (i < 0 || e <= i)) type = 'exp'; else if (i >= 0) type = 'inc';
