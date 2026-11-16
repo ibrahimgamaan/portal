@@ -53,6 +53,18 @@ public class MainActivity extends Activity {
             }
         });
         wv.loadUrl("file:///android_asset/index.html");
+        handleShare(getIntent());
+    }
+
+    @Override protected void onNewIntent(Intent i) { super.onNewIntent(i); handleShare(i); }
+
+    void handleShare(Intent i) {
+        if (i == null || !Intent.ACTION_SEND.equals(i.getAction())) return;
+        String t = i.getStringExtra(Intent.EXTRA_TEXT);
+        if (t == null || t.trim().isEmpty()) return;
+        try { SmsReceiver.push(this, "مشاركة", t, System.currentTimeMillis()); } catch (Exception e) { return; }
+        i.setAction(null);
+        wv.postDelayed(() -> wv.evaluateJavascript("window.smsStatusChanged&&smsStatusChanged()", null), 700);
     }
 
     @Override protected void onActivityResult(int req, int res, Intent data) {
@@ -72,6 +84,11 @@ public class MainActivity extends Activity {
     }
 
     class Bridge {
+        @JavascriptInterface public boolean smsSupported() {
+            try { String[] p = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS).requestedPermissions;
+                if (p != null) for (String x : p) if (Manifest.permission.RECEIVE_SMS.equals(x)) return true; } catch (Exception e) {}
+            return false;
+        }
         @JavascriptInterface public boolean hasSms() {
             return checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
         }

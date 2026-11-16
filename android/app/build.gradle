@@ -9,6 +9,8 @@ android {
         versionCode 1
         versionName '1.0'
     }
+    flavorDimensions 'sms'
+    productFlavors { full { dimension 'sms' }; lite { dimension 'sms'; applicationIdSuffix '' } }
     sourceSets { main { assets.srcDirs = ['../../masrouf'] } }
     packagingOptions { resources { excludes += ['/sw.js'] } }
     buildTypes { release { minifyEnabled false } }

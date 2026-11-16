@@ -28,18 +28,22 @@ public class SmsReceiver extends BroadcastReceiver {
         String text = body.toString();
         if (!FIN.matcher(text).find()) return;
         try {
-            JSONObject o = new JSONObject();
-            o.put("sender", parts[0].getOriginatingAddress());
-            o.put("body", text);
-            o.put("ts", parts[0].getTimestampMillis());
-            synchronized (SmsReceiver.class) {
-                SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-                JSONArray a = new JSONArray(sp.getString(KEY, "[]"));
-                a.put(o);
-                sp.edit().putString(KEY, a.toString()).apply();
-            }
+            push(c, parts[0].getOriginatingAddress(), text, parts[0].getTimestampMillis());
             notifyUser(c);
         } catch (Exception ignored) {}
+    }
+
+    static void push(Context c, String sender, String text, long ts) throws Exception {
+        JSONObject o = new JSONObject();
+        o.put("sender", sender);
+        o.put("body", text);
+        o.put("ts", ts);
+        synchronized (SmsReceiver.class) {
+            SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            JSONArray a = new JSONArray(sp.getString(KEY, "[]"));
+            a.put(o);
+            sp.edit().putString(KEY, a.toString()).apply();
+        }
     }
 
     static String take(Context c) {

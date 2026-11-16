@@ -385,7 +385,7 @@ function viewMore() {
     ${row('💱', 'العملة', esc(set.cur), 'currency')}
     ${row('🔢', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
     ${row('🌓', 'المظهر', themes[set.theme], 'theme')}
-    ${window.AndroidBridge ? row('📩', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : ''}
+    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('📩', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('📤', 'من تطبيق الرسائل: شارك الرسالة إلى مصروفي', '', 'sharehelp')) : ''}
     ${row('📋', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
     ${row('🏷️', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
     <section class="card set"><h3>البيانات والنسخ الاحتياطي</h3>
@@ -533,6 +533,7 @@ document.addEventListener('click', e => {
       break; }
     case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else AndroidBridge.requestSms(); break;
     case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const n = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(n ? 'أُضيفت للمراجعة في الرئيسية' : 'لم أتعرف على عملية مالية في هذه الرسالة'); S.tab = 'home'; render(); }); break;
+    case 'sharehelp': toast('افتح الرسالة في تطبيق الرسائل ثم اضغط مشاركة واختر مصروفي'); break;
     case 'pok': confirmPending(D.id); break;
     case 'pno': S.d.pending = S.d.pending.filter(x => x.id !== D.id); save(); render(); break;
     case 'pall': [...S.d.pending].forEach(x => confirmPending(x.id, true)); toast('تم تأكيد كل العمليات'); break;
