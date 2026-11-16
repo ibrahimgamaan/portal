@@ -135,6 +135,9 @@ input:focus,select:focus{border-color:var(--pri)}
 .pend .pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
 .pend .pb .ok{background:var(--pri);color:#fff}.pend .pb .no{color:var(--exp)}
 .pend small.src{color:var(--mute);font-size:11.5px;display:block;margin-top:2px}
+.gh{font-size:12.5px;color:var(--mute);font-weight:600;margin:12px 2px 2px}
+.sub{padding-inline-start:18px;color:var(--mute);font-size:12.5px;display:flex;justify-content:space-between}
+.chips2{display:flex;gap:6px;margin-bottom:10px}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -171,34 +174,53 @@ const KEY = 'masrouf.v1';
 const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const PALETTE = ['#f97316','#16a34a','#0ea5e9','#8b5cf6','#eab308','#ef4444','#6366f1','#ec4899','#14b8a6','#f43f5e','#a855f7','#64748b'];
-const DEF_CATS = [
-  {id:'food',name:'مطاعم وقهوة',icon:'🍽️',color:'#f97316'},
-  {id:'groc',name:'بقالة وتموينات',icon:'🛒',color:'#16a34a'},
-  {id:'trans',name:'مواصلات ووقود',icon:'⛽',color:'#0ea5e9'},
-  {id:'home',name:'سكن وإيجار',icon:'🏠',color:'#8b5cf6'},
-  {id:'bills',name:'فواتير وخدمات',icon:'💡',color:'#eab308'},
-  {id:'health',name:'صحة ودواء',icon:'💊',color:'#ef4444'},
-  {id:'edu',name:'تعليم',icon:'🎓',color:'#6366f1'},
-  {id:'shop',name:'تسوق وملابس',icon:'🛍️',color:'#ec4899'},
-  {id:'fun',name:'ترفيه',icon:'🎬',color:'#14b8a6'},
-  {id:'gift',name:'هدايا ومناسبات',icon:'🎁',color:'#f43f5e'},
-  {id:'fam',name:'الأسرة والأطفال',icon:'👨‍👩‍👧',color:'#a855f7'},
-  {id:'car',name:'السيارة وصيانتها',icon:'🚘',color:'#0369a1'},
-  {id:'subs',name:'اشتراكات رقمية',icon:'📺',color:'#7c3aed'},
-  {id:'loan',name:'أقساط وديون',icon:'💳',color:'#b45309'},
-  {id:'charity',name:'زكاة وصدقات',icon:'🤲',color:'#059669'},
-  {id:'travel',name:'سفر وسياحة',icon:'✈️',color:'#0891b2'},
-  {id:'care',name:'عناية شخصية',icon:'💇',color:'#db2777'},
-  {id:'ins',name:'تأمين',icon:'🛡️',color:'#475569'},
-  {id:'gov',name:'رسوم حكومية',icon:'🏛️',color:'#0f766e'},
-  {id:'furn',name:'أثاث وأدوات منزلية',icon:'🛋️',color:'#a16207'},
-  {id:'tech',name:'إلكترونيات وجوالات',icon:'📱',color:'#2563eb'},
-  {id:'sport',name:'رياضة ولياقة',icon:'🏋️',color:'#ea580c'},
-  {id:'pet',name:'حيوانات أليفة',icon:'🐾',color:'#84cc16'},
-  {id:'maid',name:'عمالة منزلية',icon:'🧹',color:'#be185d'},
+const GROUPS = [
+  {id:'food',name:'الطعام',icon:'🍽️',color:'#f97316'},
+  {id:'house',name:'السكن والبيت',icon:'🏠',color:'#8b5cf6'},
+  {id:'trans',name:'المواصلات والسيارة',icon:'🚗',color:'#0ea5e9'},
+  {id:'parents',name:'مصاريف الأهل',icon:'🤝',color:'#0d9488'},
+  {id:'family',name:'الأسرة',icon:'👨‍👩‍👧',color:'#a855f7'},
+  {id:'shop',name:'التسوق والشخصي',icon:'🛍️',color:'#ec4899'},
+  {id:'health',name:'الصحة والتعليم',icon:'💊',color:'#ef4444'},
+  {id:'fun',name:'الترفيه والسفر',icon:'🎬',color:'#eab308'},
+  {id:'fin',name:'المالية والالتزامات',icon:'💳',color:'#b45309'},
   {id:'other',name:'أخرى',icon:'📦',color:'#64748b'}
 ];
-const MIGR = {v2: ['car','subs','loan','charity','travel','care','ins'], v3: ['gov','furn','tech','sport','pet','maid']};
+const DEF_CATS = [
+  {id:'food',group:'food',name:'مطاعم وقهوة',icon:'🍽️',color:'#f97316'},
+  {id:'groc',group:'food',name:'بقالة ومواد غذائية',icon:'🛒',color:'#16a34a'},
+  {id:'home',group:'house',name:'سكن وإيجار',icon:'🏠',color:'#8b5cf6'},
+  {id:'bills',group:'house',name:'فواتير وخدمات',icon:'💡',color:'#eab308'},
+  {id:'repair',group:'house',name:'صيانة منزلية',icon:'🔧',color:'#78716c'},
+  {id:'furn',group:'house',name:'أثاث ومستلزمات البيت',icon:'🛋️',color:'#a16207'},
+  {id:'laundry',group:'house',name:'غسيل ملابس',icon:'🧺',color:'#38bdf8'},
+  {id:'trans',group:'trans',name:'وقود',icon:'⛽',color:'#0ea5e9'},
+  {id:'car',group:'trans',name:'السيارة وصيانتها',icon:'🚘',color:'#0369a1'},
+  {id:'carins',group:'trans',name:'تأمين السيارة',icon:'🛡️',color:'#1e40af'},
+  {id:'taxi',group:'trans',name:'أجرة ومواصلات',icon:'🚕',color:'#f59e0b'},
+  {id:'fines',group:'trans',name:'سداد مخالفات',icon:'🚨',color:'#dc2626'},
+  {id:'parentm',group:'parents',name:'المصروف الشهري للأهل',icon:'💸',color:'#0891b2'},
+  {id:'parente',group:'parents',name:'مناسبات الأهل',icon:'🎉',color:'#c026d3'},
+  {id:'parentx',group:'parents',name:'طوارئ الأهل',icon:'🆘',color:'#e11d48'},
+  {id:'fam',group:'family',name:'الأسرة والأطفال',icon:'👨‍👩‍👧',color:'#a855f7'},
+  {id:'gift',group:'family',name:'هدايا ومناسبات',icon:'🎁',color:'#f43f5e'},
+  {id:'shop',group:'shop',name:'تسوق وملابس وأحذية',icon:'🛍️',color:'#ec4899'},
+  {id:'tech',group:'shop',name:'إلكترونيات وجوالات',icon:'📱',color:'#2563eb'},
+  {id:'acc',group:'shop',name:'إكسسوارات',icon:'💍',color:'#d946ef'},
+  {id:'care',group:'shop',name:'عناية شخصية وحلاقة',icon:'💇',color:'#db2777'},
+  {id:'sport',group:'shop',name:'رياضة ولياقة',icon:'🏋️',color:'#ea580c'},
+  {id:'health',group:'health',name:'صحة ودواء',icon:'💊',color:'#ef4444'},
+  {id:'medins',group:'health',name:'تأمين طبي',icon:'🩺',color:'#475569'},
+  {id:'edu',group:'health',name:'تعليم ودورات وكتب',icon:'🎓',color:'#6366f1'},
+  {id:'fun',group:'fun',name:'ترفيه وخروجات',icon:'🎬',color:'#14b8a6'},
+  {id:'subs',group:'fun',name:'اشتراكات رقمية',icon:'📺',color:'#7c3aed'},
+  {id:'travel',group:'fun',name:'سفر وسياحة',icon:'✈️',color:'#0891b2'},
+  {id:'loan',group:'fin',name:'أقساط وديون',icon:'💳',color:'#b45309'},
+  {id:'charity',group:'fin',name:'زكاة وصدقات',icon:'🤲',color:'#059669'},
+  {id:'gov',group:'fin',name:'رسوم حكومية',icon:'🏛️',color:'#0f766e'},
+  {id:'other',group:'other',name:'أخرى',icon:'📦',color:'#64748b'}
+];
+const REMOVED = {pet: 'other', maid: 'other', ins: 'medins'};
 const INC_CATS = [
   {id:'salary',name:'راتب',icon:'💼',color:'#16a34a'},
   {id:'extra',name:'دخل إضافي',icon:'💰',color:'#0d9488'},
@@ -216,17 +238,21 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v2', 'v3'], rec: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4'], rec: []
 });
 function migrate() {
-  S.d.migr = S.d.migr || [];
-  S.d.rec = S.d.rec || [];
-  Object.entries(MIGR).forEach(([v, ids]) => { if (S.d.migr.includes(v)) return;
-    ids.forEach(id => { if (!S.d.cats.some(c => c.id === id)) { const c = DEF_CATS.find(x => x.id === id), i = S.d.cats.findIndex(x => x.id === 'other');
-      S.d.cats.splice(i < 0 ? S.d.cats.length : i, 0, {...c, budget: 0}); } });
-    S.d.migr.push(v); });
+  S.d.migr = S.d.migr || []; S.d.rec = S.d.rec || []; S.d.pending = S.d.pending || []; S.d.merchants = S.d.merchants || {};
+  if (S.d.migr.includes('v4')) return;
+  const old = S.d.cats, byId = Object.fromEntries(old.map(c => [c.id, c])), ids = DEF_CATS.map(c => c.id);
+  Object.entries(REMOVED).forEach(([from, to]) => { if (!byId[from]) return;
+    S.d.tx.forEach(t => { if (t.cat === from) t.cat = to; }); S.d.pending.forEach(t => { if (t.cat === from) t.cat = to; });
+    S.d.rec.forEach(t => { if (t.cat === from) t.cat = to; }); Object.keys(S.d.merchants).forEach(k => { if (S.d.merchants[k] === from) S.d.merchants[k] = to; }); });
+  const out = DEF_CATS.map(d => byId[d.id] ? {...byId[d.id], name: d.name, group: d.group} : {...d, budget: 0});
+  const custom = old.filter(c => !ids.includes(c.id) && !REMOVED[c.id]).map(c => ({...c, group: c.group || 'other'}));
+  out.splice(out.length - 1, 0, ...custom);
+  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4'];
 }
-let S = {tab: 'home', rep: {mode: 'month', ref: new Date()}, f: {q: '', cat: '', month: ''}, d: defaults()};
+let S = {tab: 'home', rep: {mode: 'month', ref: new Date(), by: 'cat'}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
   try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && Array.isArray(r.tx)) { const d = defaults(); S.d = {...d, ...r, set: {...d.set, ...(r.set||{})}, cats: r.cats?.length ? r.cats : d.cats, migr: r.migr || []}; migrate(); save(); } } catch (e) {}
 }
@@ -350,10 +376,9 @@ function viewLog() {
     (!f.q || (t.note + catOf(t.cat).name).includes(f.q)));
   list.sort(tcmp);
   const groups = {}; list.forEach(t => (groups[t.date] ||= []).push(t));
-  const allCats = [...S.d.cats, ...INC_CATS];
   return `<div class="filters"><input type="search" id="q" placeholder="🔍 ابحث في الملاحظات والفئات" value="${esc(f.q)}">
     <select id="fm"><option value="">كل الشهور</option>${months.map(m => { const [y, mm] = m.split('-'); return `<option value="${m}" ${f.month === m ? 'selected' : ''}>${MONTHS[mm - 1]} ${dg(y)}</option>`; }).join('')}</select>
-    <select id="fc"><option value="">كل الفئات</option>${allCats.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</select></div>
+    <select id="fc"><option value="">كل الفئات</option>${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<optgroup label="${g.icon} ${g.name}">${cs.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}<optgroup label="الدخل">${INC_CATS.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup></select></div>
     <div class="hint" style="color:var(--mute);font-size:13px">${dg(list.length)} عملية · المصروف ${money(sum(list))}${sum(list, 'inc') ? ' · الدخل ' + money(sum(list, 'inc')) : ''}</div>
     ${list.length ? Object.keys(groups).map(d => `<div><div class="day"><span>${dayLabel(d)}</span><span>${money(sum(groups[d]))}</span></div>${groups[d].map(txRow).join('')}</div>`).join('') :
       '<div class="card empty"><div class="e">🔎</div><h3>لا توجد نتائج</h3></div>'}`;
@@ -366,7 +391,9 @@ function viewRep() {
   const title = mode === 'day' ? dayLabel(ymd(ref)) : mode === 'month' ? monthLabel(ref) : `سنة ${dg(ref.getFullYear())}`;
   const sub = mode === 'day' ? '' : mode === 'month' ? `${dg(daysIn(ref))} يوماً` : '١٢ شهراً'.replace(/[١٢]/g, d => dg(d === '١' ? 1 : 2));
   const exps = cur.filter(t => t.type === 'exp');
-  const cats = groupByCat(cur);
+  const cats = groupByCat(cur), by = S.rep.by || 'cat';
+  const gm = {}; cats.forEach(c => { const g = c.group || 'other'; (gm[g] ||= {v: 0, items: []}); gm[g].v += c.v; gm[g].items.push(c); });
+  const gs = GROUPS.filter(g => gm[g.id]).map(g => ({...g, v: gm[g.id].v, items: gm[g.id].items})).sort((a, b) => b.v - a.v);
   // مخطط الأعمدة
   let chart = '', avgLabel = '', avg = 0;
   if (mode === 'month') {
@@ -392,8 +419,8 @@ function viewRep() {
     <div class="grid2">${kpi('إجمالي المصروفات', money(spent), pctBadge(spent, pspent))}${kpi('إجمالي الدخل', money(inc))}
       ${kpi('الصافي', `<span style="color:var(--${inc - spent >= 0 ? 'inc' : 'exp'})">${money(inc - spent)}</span>`)}${kpi(avgLabel, money(avg))}
       ${kpi('عدد العمليات', dg(exps.length))}${kpi('أكبر مصروف', biggest[0] ? money(biggest[0].amount) : '—')}</div>
-    ${cats.length ? `<section class="card"><h3>توزيع المصروفات حسب الفئة</h3><div class="donutwrap">${donut(cats, spent, 'المجموع')}
-      <div class="leg">${cats.map(c => { const b = mode === 'month' && c.budget > 0 ? c.budget : 0, bp = b ? c.v / b * 100 : 0;
+    ${cats.length ? `<section class="card"><h3>توزيع المصروفات</h3><div class="chips2 noprint"><button class="chip ${by === 'cat' ? 'on' : ''}" data-by="cat">حسب الفئة</button><button class="chip ${by === 'group' ? 'on' : ''}" data-by="group">حسب القسم</button></div><div class="donutwrap">${donut(by === 'group' ? gs : cats, spent, 'المجموع')}
+      <div class="leg">${by === 'group' ? gs.map(g => `<div class="it"><div class="h"><i class="dot" style="background:${g.color}"></i><b>${g.icon} ${esc(g.name)}</b><span>${dg((g.v / spent * 100).toFixed(0))}%</span><strong>${money(g.v)}</strong></div><div class="bar"><i style="width:${g.v / gs[0].v * 100}%;background:${g.color}"></i></div>${g.items.map(c => `<div class="sub"><span>${c.icon} ${esc(c.name)}</span><span>${num(c.v, 0)}</span></div>`).join('')}</div>`).join('') : cats.map(c => { const b = mode === 'month' && c.budget > 0 ? c.budget : 0, bp = b ? c.v / b * 100 : 0;
         return `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${c.icon} ${esc(c.name)}</b><span>${dg((c.v / spent * 100).toFixed(0))}%</span><strong>${money(c.v)}</strong></div>
         <div class="bar ${bp >= 100 ? 'bad' : bp >= 80 ? 'warn' : ''}"><i style="width:${b ? Math.min(bp, 100) : c.v / cats[0].v * 100}%;background:${bp >= 100 ? '' : c.color}"></i></div>${b ? `<span class="hint">الميزانية ${num(b, 0)} · ${bp >= 100 ? 'تجاوزتها' : 'المتبقي ' + num(b - c.v, 0)}</span>` : ''}</div>`; }).join('')}</div></div></section>` : ''}
     ${chart ? `<section class="card"><h3>${mode === 'month' ? 'المصروف اليومي' : 'المصروف الشهري'}</h3>${chart}</section>` : ''}
@@ -445,7 +472,7 @@ function openForm(id, pre) {
   sheet(`<div class="sh"><b>${t ? 'تعديل العملية' : 'إضافة عملية'}</b><button class="x" data-act="close">✕</button></div>
     <div class="seg" id="tseg"><button data-type="exp">مصروف</button><button data-type="inc">دخل</button></div>
     <div class="amt" id="amtBox"><input id="amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${src ? src.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
-    <div class="cg" id="cg"></div>
+    <div id="cg"></div>
     <div class="fld" id="dchips"></div>
     <div class="fld"><input type="text" id="note" list="notes" placeholder="ملاحظة (اختياري) مثل: غداء مع الأصدقاء" value="${esc(src?.note ?? src?.merchant ?? '')}" maxlength="120">
     <datalist id="notes">${[...new Set(S.d.tx.map(x => x.note).filter(Boolean))].slice(-60).map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
@@ -455,10 +482,16 @@ function openForm(id, pre) {
 function paintForm() {
   document.querySelectorAll('#tseg button').forEach(b => b.classList.toggle('on', b.dataset.type === F.type));
   $('#amtBox').className = 'amt ' + F.type;
-  let cats = F.type === 'exp' ? [...S.d.cats] : INC_CATS;
-  if (F.type === 'exp') { const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1); cats.sort((a, b) => (cnt[b.id] || 0) - (cnt[a.id] || 0)); }
-  if (!cats.find(c => c.id === F.cat)) F.cat = cats[0]?.id;
-  $('#cg').innerHTML = cats.map(c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e">${c.icon}</span>${esc(c.name)}</button>`).join('');
+  const btn = c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e">${c.icon}</span>${esc(c.name)}</button>`;
+  const sec = (title, cs) => `<div class="gh">${title}</div><div class="cg">${cs.map(btn).join('')}</div>`;
+  let all = F.type === 'exp' ? S.d.cats : INC_CATS, html;
+  if (F.type === 'exp') {
+    const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1);
+    const top = S.d.cats.filter(c => cnt[c.id] > 1).sort((a, b) => cnt[b.id] - cnt[a.id]).slice(0, 4);
+    html = (top.length ? sec('⭐ الأكثر استخداماً', top) : '') + GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? sec(`${g.icon} ${g.name}`, cs) : ''; }).join('');
+  } else html = `<div class="cg">${INC_CATS.map(btn).join('')}</div>`;
+  if (!all.find(c => c.id === F.cat)) F.cat = all[0]?.id;
+  $('#cg').innerHTML = html.replace(new RegExp(`data-cat="${F.cat}" class=""`, 'g'), `data-cat="${F.cat}" class="on"`);
   const t = todayStr(), y = ymd(new Date(Date.now() - 864e5));
   $('#dchips').innerHTML = `<button class="chip ${F.date === t ? 'on' : ''}" data-d="${t}">اليوم</button><button class="chip ${F.date === y ? 'on' : ''}" data-d="${y}">أمس</button>
     <input type="date" id="date" value="${F.date}" max="${t}" style="flex:1;min-width:140px"><input type="time" id="time" value="${F.time || ''}" style="width:118px">`;
@@ -484,14 +517,15 @@ function promptSheet(title, label, value, onOk, type = 'text') {
 }
 function catsSheet() {
   sheet(`<div class="sh"><b>إدارة الفئات</b><button class="x" data-act="close">✕</button></div>
-    <div class="card set">${S.d.cats.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e">${c.icon}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>
+    ${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<div class="gh">${g.icon} ${g.name}</div><div class="card set">${cs.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e">${c.icon}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>` : ''; }).join('')}
     <div class="btns"><button class="btn p" data-act="catnew">+ فئة جديدة</button></div>`);
 }
 function catForm(id) {
-  const c = id ? S.d.cats.find(x => x.id === id) : {icon: ICONS[0], color: PALETTE[0], name: '', budget: 0};
+  const c = id ? S.d.cats.find(x => x.id === id) : {icon: ICONS[0], color: PALETTE[0], name: '', budget: 0, group: 'other'};
   F = {cid: id, icon: c.icon, color: c.color};
   sheet(`<div class="sh"><b>${id ? 'تعديل الفئة' : 'فئة جديدة'}</b><button class="x" data-act="close">✕</button></div>
     <div class="fld"><input id="cn" type="text" placeholder="اسم الفئة" value="${esc(c.name)}" maxlength="30"></div>
+    <div class="fld"><select id="cgp">${GROUPS.map(g => `<option value="${g.id}" ${g.id === (c.group || 'other') ? 'selected' : ''}>${g.icon} القسم: ${g.name}</option>`).join('')}</select></div>
     <div class="cg" id="ig" style="grid-template-columns:repeat(7,1fr)">${ICONS.map(i => `<button data-icon="${i}" class="${i === c.icon ? 'on' : ''}"><span class="e">${i}</span></button>`).join('')}</div>
     <div class="colors" id="clg">${PALETTE.map(p => `<i data-color="${p}" style="background:${p}" class="${p === c.color ? 'on' : ''}"></i>`).join('')}</div>
     <div class="fld" style="margin-top:12px"><input id="cb" type="number" inputmode="decimal" placeholder="ميزانية شهرية لهذه الفئة (اختياري)" value="${c.budget || ''}"></div>
@@ -513,9 +547,10 @@ const stamp = () => todayStr();
 
 /* ============ الأحداث ============ */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color]'); if (!el) return;
+  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by]'); if (!el) return;
   const D = el.dataset;
   if (D.tab) { S.tab = D.tab; render(); scrollTo(0, 0); return; }
+  if (D.by) { S.rep.by = D.by; render(); return; }
   if (D.mode) { S.rep.mode = D.mode; render(); return; }
   if (D.shift) { S.rep.ref = shift(S.rep.mode, S.rep.ref, +D.shift); render(); return; }
   if (D.type && F) { F.type = D.type; F.cat = null; paintForm(); return; }
@@ -546,7 +581,7 @@ document.addEventListener('click', e => {
     case 'catedit': catForm(D.id); break;
     case 'catsave': {
       const name = $('#cn').value.trim(); if (!name) { toast('اكتب اسم الفئة'); break; }
-      const rec = {name, icon: F.icon, color: F.color, budget: Math.max(0, parseFloat(toLatin($('#cb').value)) || 0)};
+      const rec = {name, group: $('#cgp').value, icon: F.icon, color: F.color, budget: Math.max(0, parseFloat(toLatin($('#cb').value)) || 0)};
       if (F.cid) Object.assign(S.d.cats.find(c => c.id === F.cid), rec); else S.d.cats.push({id: 'c' + uid(), ...rec});
       save(); catsSheet(); render(); break; }
     case 'catdel': {
@@ -630,7 +665,7 @@ function recForm(id) {
   sheet(`<div class="sh"><b>${id ? 'تعديل البند' : 'بند متكرر جديد'}</b><button class="x" data-act="close">✕</button></div>
     <div class="fld"><input id="rn" type="text" placeholder="الاسم (مثال: إيجار الشقة)" value="${esc(r.note)}" maxlength="60"></div>
     <div class="amt exp"><input id="ra" inputmode="decimal" placeholder="المبلغ" value="${r.amount}"><span>${esc(S.d.set.cur)}</span></div>
-    <div class="fld"><select id="rc"><optgroup label="مصروفات">${S.d.cats.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>
+    <div class="fld"><select id="rc"><optgroup label="مصروفات">${GROUPS.flatMap(g => S.d.cats.filter(c => (c.group || 'other') === g.id)).map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>
       <optgroup label="دخل">${INC_CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup></select></div>
     <div class="fld"><input id="rd" type="number" min="1" max="28" inputmode="numeric" placeholder="يوم الشهر (من 1 إلى 28)" value="${r.day}"></div>
     <div class="btns">${id ? '<button class="btn d" data-act="recdel">حذف</button>' : ''}<button class="btn p" data-act="recsave">حفظ</button></div>`);
