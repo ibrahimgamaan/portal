@@ -9,6 +9,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.util.Base64;
 import android.print.PrintManager;
 import android.provider.MediaStore;
 import android.webkit.*;
@@ -59,6 +62,11 @@ public class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent i) { super.onNewIntent(i); handleShare(i); }
 
     void handleShare(Intent i) {
+        if (i != null && "app.masrouf.ADD".equals(i.getAction())) {
+            i.setAction(null);
+            wv.postDelayed(() -> wv.evaluateJavascript("window.openForm&&openForm()", null), 900);
+            return;
+        }
         if (i == null || !Intent.ACTION_SEND.equals(i.getAction())) return;
         String t = i.getStringExtra(Intent.EXTRA_TEXT);
         if (t == null || t.trim().isEmpty()) return;
@@ -84,6 +92,23 @@ public class MainActivity extends Activity {
     }
 
     class Bridge {
+        @JavascriptInterface public void haptic(int ms) {
+            Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+            if (v != null && v.hasVibrator()) v.vibrate(VibrationEffect.createOneShot(Math.max(5, Math.min(ms, 60)), VibrationEffect.DEFAULT_AMPLITUDE));
+        }
+        @JavascriptInterface public void shareImage(String name, String b64) {
+            try {
+                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                ContentValues cv = new ContentValues();
+                cv.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+                cv.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                cv.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Masrouf");
+                Uri u = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+                try (OutputStream o = getContentResolver().openOutputStream(u)) { o.write(data); }
+                Intent s = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, u).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(s, "مشاركة الملخص"));
+            } catch (Exception e) { toast("تعذّرت المشاركة"); }
+        }
         @JavascriptInterface public boolean smsSupported() {
             try { String[] p = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS).requestedPermissions;
                 if (p != null) for (String x : p) if (Manifest.permission.RECEIVE_SMS.equals(x)) return true; } catch (Exception e) {}

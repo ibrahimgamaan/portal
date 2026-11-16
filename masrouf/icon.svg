@@ -1,8 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b5f59"/></linearGradient></defs>
 <rect width="512" height="512" rx="112" fill="url(#g)"/>
-<g transform="translate(256 256)" fill="none" stroke-width="56" stroke-linecap="butt">
-<circle r="104" stroke="#ffffff" stroke-opacity=".28"/>
-<circle r="104" stroke="#ffffff" stroke-dasharray="360 800" transform="rotate(-90)"/>
-<circle r="104" stroke="#fcd34d" stroke-dasharray="120 800" stroke-dashoffset="-380" transform="rotate(-90)"/>
-</g></svg>
+<g transform="translate(256 256) rotate(-90)" fill="none" stroke-width="54">
+<circle r="118" stroke="#fff" stroke-opacity=".22"/><circle r="118" stroke="#fff" stroke-linecap="round" stroke-dasharray="430 800"/>
+<circle r="118" stroke="#fcd34d" stroke-linecap="round" stroke-dasharray="90 800" stroke-dashoffset="-470"/></g>
+<circle cx="256" cy="256" r="36" fill="#fff"/><circle cx="256" cy="256" r="16" fill="#0f766e"/></svg>

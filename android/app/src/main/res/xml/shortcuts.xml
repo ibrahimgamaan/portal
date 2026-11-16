@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="add" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/add_short" android:shortcutLongLabel="@string/add_long">
+        <intent android:action="app.masrouf.ADD" android:targetPackage="app.masrouf" android:targetClass="app.masrouf.MainActivity"/>
+    </shortcut>
+</shortcuts>
