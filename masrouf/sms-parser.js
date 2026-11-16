@@ -5,9 +5,15 @@
   const CUR = '(?:SAR|SR|S\\.R|ر\\.?\\s?س|ريال)';
   const NUM = '(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?)';
   const SKIP = /(رمز|OTP|كلمة\s*(?:السر|المرور)|verification|one.?time|رمز التحقق|لا تشارك|تم رفض|رفض|declined|فشل)/i;
-  const EXP = /(شراء|مشتريات|سحب|خصم|دفع|سداد|حوالة\s*صادرة|تحويل\s*صادر|حوالة\s*محلية|فاتورة|اشتراك|purchase|pos|withdraw|debit|paid|payment|sent|transfer\s*to)/i;
-  const INC = /(إيداع|ايداع|حوالة\s*واردة|تحويل\s*وارد|راتب|استلام|استرداد|credit|deposit|received|refund|salary)/i;
+  const EXP = /(شراء|مشتريات|سحب|خصم|دفع|سداد|حوالة\s*صادرة|تحويل\s*صادر|حوالة\s*محلية|فاتورة|اشتراك|purchase|pos|withdraw|debit|paid|payment|sent|transfer|outgoing|bill\s*pay|atm|online|sadad)/i;
+  const INC = /(إيداع|ايداع|حوالة\s*واردة|تحويل\s*وارد|راتب|استلام|استرداد|credited|deposit|received|refund|salary|incoming)/i;
   const CATS = [
+    ['gov', /(أبشر|ابشر|مرور|جوازات|وزارة|بلدية|مخالفة|absher|traffic|moi\b|passport|municipal|توثيق|ناجز|najiz|قوى|muqeem|مقيم)/i],
+    ['tech', /(إكسترا|اكسترا|extra\b|جرير|jarir|apple\s*store|samsung|الكترونيات|إلكترونيات|electronics|xcite|اكس سايت|stc\s*shop|جوال|mobile\s*shop)/i],
+    ['furn', /(ايكيا|ikea|هوم سنتر|home\s*cent|أثاث|اثاث|مفروشات|furniture|danube\s*home|ساكو|saco|safco|home\s*box)/i],
+    ['sport', /(جيم|نادي|gym|fitness|decathlon|ديكاثلون|سن اند ساند|sun\s*&\s*sand|لياقة|رياضة|sport|padel|بادل)/i],
+    ['pet', /(\bpet\b|petshop|بيطري|veterinary|حيوانات|vet\b|pets)/i],
+    ['maid', /(عمالة|خادمة|مساند|musaned|استقدام|تنظيف|cleaning|maid)/i],
     ['ins', /(تأمين|تامين|التعاونية|بوبا|ميدغلف|insurance|tawuniya|bupa|medgulf|malath|ملاذ)/i],
     ['charity', /(زكاة|زكاه|صدقة|صدقه|تبرع|جمعية|إحسان|احسان|وقف|ehsan|charity|donat|zakat|sadaqah|waqf)/i],
     ['loan', /(قسط|أقساط|اقساط|تمويل|قرض|تابي|تمارا|installment|loan|finance|tabby|tamara|tasheel|تسهيل)/i],
@@ -66,7 +72,7 @@
     for (const re of pats) { const m = main.match(re); if (m) { amount = parseFloat(m[1].replace(/,/g, '')); break; } }
     if (!(amount > 0)) return null;
     let merchant = '';
-    const mm = main.match(/(?:لدى|عند|من\s*متجر|التاجر|\bmerchant\b|\bat\b|\bto\b|الى|إلى|(?<=^|\s)من)\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i);
+    const mm = main.match(/(?:لدى|عند|من\s*متجر|التاجر|\bmerchant\b|\bat\b|\bto\b|\bfrom\b|\bbiller\b|المستفيد|الجهة|الى|إلى|(?<=^|\s)من)\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i);
     if (mm) merchant = mm[1].replace(/[*:]+$/g, '').replace(/^[\s:*-]+|[\s:*-]+$/g, '').slice(0, 40);
     return {type, amount, merchant, date: parseDate(t, ts), cat: type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main)};
   }

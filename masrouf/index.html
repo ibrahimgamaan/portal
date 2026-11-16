@@ -9,8 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts.css">
 <style>
 :root{
   --bg:#f3f6f6;--card:#fff;--ink:#0f1f1e;--mute:#64748b;--line:#e3eaea;--pri:#0f766e;--pri2:#14b8a6;
@@ -191,9 +190,15 @@ const DEF_CATS = [
   {id:'travel',name:'سفر وسياحة',icon:'✈️',color:'#0891b2'},
   {id:'care',name:'عناية شخصية',icon:'💇',color:'#db2777'},
   {id:'ins',name:'تأمين',icon:'🛡️',color:'#475569'},
+  {id:'gov',name:'رسوم حكومية',icon:'🏛️',color:'#0f766e'},
+  {id:'furn',name:'أثاث وأدوات منزلية',icon:'🛋️',color:'#a16207'},
+  {id:'tech',name:'إلكترونيات وجوالات',icon:'📱',color:'#2563eb'},
+  {id:'sport',name:'رياضة ولياقة',icon:'🏋️',color:'#ea580c'},
+  {id:'pet',name:'حيوانات أليفة',icon:'🐾',color:'#84cc16'},
+  {id:'maid',name:'عمالة منزلية',icon:'🧹',color:'#be185d'},
   {id:'other',name:'أخرى',icon:'📦',color:'#64748b'}
 ];
-const CATS_V2 = ['car','subs','loan','charity','travel','care','ins'];
+const MIGR = {v2: ['car','subs','loan','charity','travel','care','ins'], v3: ['gov','furn','tech','sport','pet','maid']};
 const INC_CATS = [
   {id:'salary',name:'راتب',icon:'💼',color:'#16a34a'},
   {id:'extra',name:'دخل إضافي',icon:'💰',color:'#0d9488'},
@@ -211,15 +216,15 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto'}, migr: ['v2']
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v2', 'v3'], rec: []
 });
 function migrate() {
   S.d.migr = S.d.migr || [];
-  if (!S.d.migr.includes('v2')) {
-    CATS_V2.forEach(id => { if (!S.d.cats.some(c => c.id === id)) { const c = DEF_CATS.find(x => x.id === id), i = S.d.cats.findIndex(x => x.id === 'other');
+  S.d.rec = S.d.rec || [];
+  Object.entries(MIGR).forEach(([v, ids]) => { if (S.d.migr.includes(v)) return;
+    ids.forEach(id => { if (!S.d.cats.some(c => c.id === id)) { const c = DEF_CATS.find(x => x.id === id), i = S.d.cats.findIndex(x => x.id === 'other');
       S.d.cats.splice(i < 0 ? S.d.cats.length : i, 0, {...c, budget: 0}); } });
-    S.d.migr.push('v2');
-  }
+    S.d.migr.push(v); });
 }
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date()}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
@@ -277,7 +282,7 @@ function txRow(t) {
   const c = catOf(t.cat);
   return `<button class="tx" data-act="edit" data-id="${t.id}">
     <span class="ic" style="background:${c.color}22">${c.icon}</span>
-    <span class="t"><b>${esc(c.name)}</b><span>${esc(t.note) || '—'}</span></span>
+    <span class="t"><b>${esc(c.name)}</b><span>${esc(t.note) || '—'}${t.auto ? ' · 📩' : ''}${t.rec ? ' · 🔁' : ''}</span></span>
     <span class="a ${t.type}">${sign(t.type, t.amount)} <small>${esc(S.d.set.cur)}</small></span></button>`;
 }
 function donut(items, total, label) {
@@ -402,7 +407,9 @@ function viewMore() {
     ${row('🔢', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
     ${row('🌓', 'المظهر', themes[set.theme], 'theme')}
     ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('📩', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('📤', 'من تطبيق الرسائل: شارك الرسالة إلى مصروفي', '', 'sharehelp')) : ''}
+    ${row('⚡', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
     ${row('📋', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
+    ${row('🔁', 'المصاريف المتكررة', dg(S.d.rec.length) + ' بند', 'recs')}
     ${row('🏷️', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
     <section class="card set"><h3>البيانات والنسخ الاحتياطي</h3>
     ${row('📄', 'تصدير كل العمليات (Excel / CSV)', '', 'csv')}
@@ -549,6 +556,18 @@ document.addEventListener('click', e => {
       break; }
     case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else AndroidBridge.requestSms(); break;
     case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const n = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(n ? 'أُضيفت للمراجعة في الرئيسية' : 'لم أتعرف على عملية مالية في هذه الرسالة'); S.tab = 'home'; render(); }); break;
+    case 'autotoggle': set.auto = !set.auto; save(); render(); toast(set.auto ? 'الرسائل المعروفة الفئة تُسجَّل مباشرة، وغير المعروفة تنتظر مراجعتك' : 'كل الرسائل تنتظر مراجعتك'); break;
+    case 'recs': recsSheet(); break;
+    case 'recnew': recForm(); break;
+    case 'recedit': recForm(D.id); break;
+    case 'recsave': {
+      const amt = parseFloat(toLatin($('#ra').value)), day = Math.min(28, Math.max(1, parseInt(toLatin($('#rd').value)) || 1)), cat = $('#rc').value;
+      if (!(amt > 0)) { toast('أدخل مبلغاً صحيحاً'); break; }
+      const rec = {amount: Math.round(amt * 100) / 100, day, cat, type: INC_CATS.some(c => c.id === cat) ? 'inc' : 'exp', note: $('#rn').value.trim()};
+      if (F.rid) Object.assign(S.d.rec.find(r => r.id === F.rid), rec); else { const n = new Date(), pm = new Date(n.getFullYear(), n.getMonth() - 1, 1);
+        S.d.rec.push({id: uid(), last: day <= n.getDate() ? `${n.getFullYear()}-${pad(n.getMonth() + 1)}` : `${pm.getFullYear()}-${pad(pm.getMonth() + 1)}`, ...rec}); }
+      save(); runRecurring(); recsSheet(); render(); break; }
+    case 'recdel': S.d.rec = S.d.rec.filter(r => r.id !== F.rid); save(); recsSheet(); render(); break;
     case 'sharehelp': toast('افتح الرسالة في تطبيق الرسائل ثم اضغط مشاركة واختر مصروفي'); break;
     case 'pok': confirmPending(D.id); break;
     case 'pno': S.d.pending = S.d.pending.filter(x => x.id !== D.id); save(); render(); break;
@@ -581,6 +600,38 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__pwa = {prompt: () => e.prompt()}; if (S.tab === 'more') render(); });
 
+/* ============ المصاريف المتكررة ============ */
+function runRecurring() {
+  const now = new Date(), cm = now.getFullYear() * 12 + now.getMonth(); let n = 0;
+  (S.d.rec || []).forEach(r => {
+    const [y, m] = r.last.split('-').map(Number);
+    for (let k = y * 12 + m; k <= cm; k++) {
+      const yy = Math.floor(k / 12), mm = k % 12, d = Math.min(r.day, new Date(yy, mm + 1, 0).getDate());
+      if (k === cm && d > now.getDate()) break;
+      S.d.tx.push({id: uid(), ts: Date.now() + n, type: r.type, amount: r.amount, cat: r.cat, note: r.note, date: `${yy}-${pad(mm + 1)}-${pad(d)}`, rec: r.id});
+      r.last = `${yy}-${pad(mm + 1)}`; n++;
+    }
+  });
+  if (n) { save(); render(); toast(`سُجّلت ${dg(n)} عملية متكررة تلقائياً 🔁`); }
+}
+function recsSheet() {
+  sheet(`<div class="sh"><b>المصاريف المتكررة</b><button class="x" data-act="close">✕</button></div>
+    <div class="hint" style="color:var(--mute);font-size:13px;margin-bottom:8px">تُسجَّل تلقائياً في يومها من كل شهر، مثل الإيجار والاشتراكات والأقساط.</div>
+    ${S.d.rec.length ? `<div class="card set">${S.d.rec.map(r => { const c = catOf(r.cat); return `<button class="r" data-act="recedit" data-id="${r.id}"><span class="e">${c.icon}</span><b>${esc(r.note || c.name)}</b><span>${num(r.amount, 0)} · يوم ${dg(r.day)}</span></button>`; }).join('')}</div>` : '<div class="empty"><div class="e">🔁</div>لا توجد بنود متكررة بعد</div>'}
+    <div class="btns"><button class="btn p" data-act="recnew">+ بند متكرر جديد</button></div>`);
+}
+function recForm(id) {
+  const r = id ? S.d.rec.find(x => x.id === id) : {amount: '', day: 1, cat: S.d.cats[0].id, note: ''};
+  F = {rid: id};
+  sheet(`<div class="sh"><b>${id ? 'تعديل البند' : 'بند متكرر جديد'}</b><button class="x" data-act="close">✕</button></div>
+    <div class="fld"><input id="rn" type="text" placeholder="الاسم (مثال: إيجار الشقة)" value="${esc(r.note)}" maxlength="60"></div>
+    <div class="amt exp"><input id="ra" inputmode="decimal" placeholder="المبلغ" value="${r.amount}"><span>${esc(S.d.set.cur)}</span></div>
+    <div class="fld"><select id="rc"><optgroup label="مصروفات">${S.d.cats.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>
+      <optgroup label="دخل">${INC_CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup></select></div>
+    <div class="fld"><input id="rd" type="number" min="1" max="28" inputmode="numeric" placeholder="يوم الشهر (من 1 إلى 28)" value="${r.day}"></div>
+    <div class="btns">${id ? '<button class="btn d" data-act="recdel">حذف</button>' : ''}<button class="btn p" data-act="recsave">حفظ</button></div>`);
+}
+
 /* ============ قراءة رسائل البنك ============ */
 const mkey = m => String(m || '').toLowerCase().replace(/\s+/g, ' ').trim();
 function learn(merchant, cat) { const k = mkey(merchant); if (k) S.d.merchants[k] = cat; }
@@ -592,7 +643,9 @@ function ingestSms(list) {
     const r = SmsParser.parseSms(m.body, m.ts); S.d.seen.push(key);
     if (!r) return;
     const k = mkey(r.merchant); if (r.type === 'exp' && S.d.merchants[k]) r.cat = S.d.merchants[k];
-    S.d.pending.push({id: uid(), sender: m.sender, ...r}); added++;
+    if (S.d.set.auto && r.cat !== 'other') { S.d.tx.push({id: uid(), ts: Date.now(), type: r.type, amount: r.amount, cat: r.cat, note: r.merchant || '', date: r.date, auto: true}); learn(r.merchant, r.cat); S.auto = (S.auto || 0) + 1; }
+    else S.d.pending.push({id: uid(), sender: m.sender, ...r});
+    added++;
   });
   S.d.seen = S.d.seen.slice(-400); save(); return added;
 }
@@ -604,7 +657,7 @@ function confirmPending(id, quiet) {
 }
 function pullSms() {
   if (!window.AndroidBridge) return;
-  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast('وصلت عملية جديدة للمراجعة 📩'); } } catch (e) {}
+  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast(S.auto ? 'سُجّلت عملية من رسالة البنك 📩' : 'وصلت عملية جديدة للمراجعة 📩'); S.auto = 0; } } catch (e) {}
 }
 window.smsStatusChanged = () => { render(); pullSms(); };
 if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', pullSms); }
@@ -624,7 +677,8 @@ function demo() {
 }
 
 /* تشغيل */
-load(); applyTheme(); render(); pullSms();
+load(); applyTheme(); render(); pullSms(); runRecurring();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) runRecurring(); });
 if ('serviceWorker' in navigator && /^https:|localhost|127\.0\.0\.1/.test(location.protocol + location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 window.__app = {S, render};
 </script>
