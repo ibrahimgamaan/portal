@@ -204,6 +204,7 @@ const DEF_CATS = [
   {id:'parentx',group:'parents',name:'طوارئ الأهل',icon:'🆘',color:'#e11d48'},
   {id:'fam',group:'family',name:'الأسرة والأطفال',icon:'👨‍👩‍👧',color:'#a855f7'},
   {id:'gift',group:'family',name:'هدايا ومناسبات',icon:'🎁',color:'#f43f5e'},
+  {id:'personal',group:'family',name:'مصروف شخصي',icon:'👤',color:'#0284c7'},
   {id:'shop',group:'shop',name:'تسوق وملابس وأحذية',icon:'🛍️',color:'#ec4899'},
   {id:'tech',group:'shop',name:'إلكترونيات وجوالات',icon:'📱',color:'#2563eb'},
   {id:'acc',group:'shop',name:'إكسسوارات',icon:'💍',color:'#d946ef'},
@@ -238,11 +239,15 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4'], rec: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b'], rec: []
 });
 function migrate() {
   S.d.migr = S.d.migr || []; S.d.rec = S.d.rec || []; S.d.pending = S.d.pending || []; S.d.merchants = S.d.merchants || {};
-  if (S.d.migr.includes('v4')) return;
+  if (S.d.migr.includes('v4')) {
+    if (!S.d.migr.includes('v4b')) { if (!S.d.cats.some(c => c.id === 'personal')) { const i = S.d.cats.findIndex(c => c.id === 'gift'), d = DEF_CATS.find(c => c.id === 'personal');
+      S.d.cats.splice(i < 0 ? S.d.cats.length - 1 : i + 1, 0, {...d, budget: 0}); } S.d.migr.push('v4b'); }
+    return;
+  }
   const old = S.d.cats, byId = Object.fromEntries(old.map(c => [c.id, c])), ids = DEF_CATS.map(c => c.id);
   Object.entries(REMOVED).forEach(([from, to]) => { if (!byId[from]) return;
     S.d.tx.forEach(t => { if (t.cat === from) t.cat = to; }); S.d.pending.forEach(t => { if (t.cat === from) t.cat = to; });
@@ -250,7 +255,7 @@ function migrate() {
   const out = DEF_CATS.map(d => byId[d.id] ? {...byId[d.id], name: d.name, group: d.group} : {...d, budget: 0});
   const custom = old.filter(c => !ids.includes(c.id) && !REMOVED[c.id]).map(c => ({...c, group: c.group || 'other'}));
   out.splice(out.length - 1, 0, ...custom);
-  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4'];
+  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b'];
 }
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date(), by: 'cat'}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
