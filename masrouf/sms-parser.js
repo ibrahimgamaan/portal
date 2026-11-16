@@ -18,7 +18,15 @@
     ['fun', /(سينما|نتفلكس|netflix|شاهد|shahid|playstation|steam|vox|muvi|spotify|youtube|apple\.com|itunes|ألعاب)/i],
     ['home', /(إيجار|ايجار|ejar)/i]
   ];
-  const guessCat = m => { for (const [id, re] of CATS) if (re.test(m || '')) return id; return 'other'; };
+  /* محلات حدّدتَ فئتها بنفسك (لها الأولوية على التخمين) */
+  const KNOWN = [
+    ['shawerma house', 'food'],
+    ['shabyat almualem', 'food'],
+    ['folwat albahrain', 'groc'],
+    ['dawar alsaada', 'food']
+  ];
+  const guessCat = m => { const l = String(m || '').toLowerCase(); for (const [k, c] of KNOWN) if (l.includes(k)) return c; return guessRule(m); };
+  const guessRule = m => { for (const [id, re] of CATS) if (re.test(m || '')) return id; return 'other'; };
 
   function parseDate(t, fallbackTs) {
     const d = t.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/) || null;
