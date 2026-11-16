@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.provider.MediaStore;
@@ -64,7 +67,21 @@ public class MainActivity extends Activity {
             r -> { if (!"1".equals(r)) finish(); });
     }
 
+    @Override public void onRequestPermissionsResult(int req, String[] p, int[] r) {
+        wv.evaluateJavascript("window.smsStatusChanged&&smsStatusChanged()", null);
+    }
+
     class Bridge {
+        @JavascriptInterface public boolean hasSms() {
+            return checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
+        }
+        @JavascriptInterface public void requestSms() {
+            runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.POST_NOTIFICATIONS}, 2);
+                else requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, 2);
+            });
+        }
+        @JavascriptInterface public String takeSms() { return SmsReceiver.take(MainActivity.this); }
         @JavascriptInterface public void save(String name, String mime, String text) {
             try {
                 ContentValues v = new ContentValues();

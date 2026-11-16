@@ -129,6 +129,13 @@ input:focus,select:focus{border-color:var(--pri)}
 .toast button{color:#5eead4;font-weight:700}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters input{grid-column:1/-1}
 .colors{display:flex;gap:8px;flex-wrap:wrap}.colors i{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer}.colors i.on{border-color:var(--ink)}
+.pend{border:2px solid var(--pri2);background:var(--pri-soft)}
+.pend .tx{box-shadow:none;margin-bottom:8px;display:block}
+.pend .tx .top2{display:flex;align-items:center;gap:12px}
+.pend .pb{display:flex;gap:6px;margin-top:10px}
+.pend .pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
+.pend .pb .ok{background:var(--pri);color:#fff}.pend .pb .no{color:var(--exp)}
+.pend small.src{color:var(--mute);font-size:11.5px;display:block;margin-top:2px}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -156,6 +163,7 @@ input:focus,select:focus{border-color:var(--pri)}
 <div id="layer"></div>
 <input type="file" id="file" accept=".json,application/json" hidden>
 
+<script src="sms-parser.js"></script>
 <script>
 'use strict';
 /* ============ أدوات ============ */
@@ -194,7 +202,7 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 
 /* ============ الحالة ============ */
 const defaults = () => ({
-  tx: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
+  tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
   set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto'}
 });
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date()}, f: {q: '', cat: '', month: ''}, d: defaults()};
@@ -277,8 +285,18 @@ const pctBadge = (cur, prev) => {
 };
 
 /* ============ الشاشات ============ */
+function pendingCard() {
+  const p = S.d.pending; if (!p.length) return '';
+  return `<section class="card pend"><h3>📩 بانتظار المراجعة (${dg(p.length)})</h3>${p.map(x => { const c = catOf(x.cat);
+    return `<div class="tx"><div class="top2"><span class="ic" style="background:${c.color}22">${c.icon}</span>
+    <span class="t"><b>${esc(x.merchant || c.name)}</b><span>${esc(c.name)} · ${dayLabel(x.date)}</span></span>
+    <span class="a ${x.type}">${sign(x.type, x.amount)} <small>${esc(S.d.set.cur)}</small></span></div>
+    <div class="pb"><button class="ok" data-act="pok" data-id="${x.id}">تأكيد</button><button data-act="pedit" data-id="${x.id}">تعديل</button><button class="no" data-act="pno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}
+    ${p.length > 1 ? '<button class="link" data-act="pall" style="margin-top:2px">تأكيد الكل</button>' : ''}</section>`;
+}
 function viewHome() {
   const now = new Date(), tx = S.d.tx, set = S.d.set;
+  if (!tx.length && S.d.pending.length) return pendingCard();
   if (!tx.length) return `<div class="card empty"><div class="e">👋</div><h3>أهلاً بك في مصروفي</h3>
     <p>اضغط على زر <b>+</b> وسجّل أول مصروف لك. لن يأخذ منك أكثر من ثوانٍ.</p>
     <div class="btns"><button class="btn p" data-act="add">تسجيل أول مصروف</button><button class="btn" data-act="demo">تجربة ببيانات وهمية</button></div></div>`;
@@ -295,7 +313,7 @@ function viewHome() {
   } else budgetHtml = `<div class="hint">المتوسط اليومي ${num(spent / dom, 0)} ${esc(set.cur)} · التوقع لنهاية الشهر ${num(proj, 0)}</div>`;
   const cats = groupByCat(mo).slice(0, 4), tot = spent || 1;
   const recent = [...tx].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts).slice(0, 6);
-  return `<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
+  return `${pendingCard()}<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
     <div class="big m">${num(spent)} <small>${esc(set.cur)}</small></div>${budgetHtml}
     <div class="row" style="margin-top:12px"><div class="mini">اليوم<b>${num(today, 0)}</b></div><div class="mini">الدخل<b>${num(inc, 0)}</b></div><div class="mini">الصافي<b>${num(inc - spent, 0)}</b></div></div></section>
     ${cats.length ? `<section class="card"><h3>أكثر الفئات صرفاً هذا الشهر <a data-tab="rep">التفاصيل</a></h3><div class="leg">${cats.map(c => `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${c.icon} ${esc(c.name)}</b><strong>${money(c.v)}</strong></div><div class="bar"><i style="width:${c.v / tot * 100}%;background:${c.color}"></i></div></div>`).join('')}</div></section>` : ''}
@@ -367,6 +385,8 @@ function viewMore() {
     ${row('💱', 'العملة', esc(set.cur), 'currency')}
     ${row('🔢', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
     ${row('🌓', 'المظهر', themes[set.theme], 'theme')}
+    ${window.AndroidBridge ? row('📩', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : ''}
+    ${row('📋', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
     ${row('🏷️', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
     <section class="card set"><h3>البيانات والنسخ الاحتياطي</h3>
     ${row('📄', 'تصدير كل العمليات (Excel / CSV)', '', 'csv')}
@@ -391,15 +411,17 @@ function sheet(html) {
 const closeSheet = () => { $('#layer').innerHTML = ''; };
 
 let F = {}; // حالة نموذج الإضافة
-function openForm(id) {
-  const t = id ? S.d.tx.find(x => x.id === id) : null;
-  F = {id, type: t?.type || 'exp', cat: t?.cat || null, date: t?.date || todayStr()};
+function openForm(id, pre) {
+  let t = id ? S.d.tx.find(x => x.id === id) : null;
+  if (pre) t = null;
+  const src = t || pre;
+  F = {id, pid: pre?.id, merchant: pre?.merchant, type: src?.type || 'exp', cat: src?.cat || null, date: src?.date || todayStr()};
   sheet(`<div class="sh"><b>${t ? 'تعديل العملية' : 'إضافة عملية'}</b><button class="x" data-act="close">✕</button></div>
     <div class="seg" id="tseg"><button data-type="exp">مصروف</button><button data-type="inc">دخل</button></div>
-    <div class="amt" id="amtBox"><input id="amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${t ? t.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
+    <div class="amt" id="amtBox"><input id="amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${src ? src.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
     <div class="cg" id="cg"></div>
     <div class="fld" id="dchips"></div>
-    <div class="fld"><input type="text" id="note" list="notes" placeholder="ملاحظة (اختياري) مثل: غداء مع الأصدقاء" value="${esc(t?.note || '')}" maxlength="120">
+    <div class="fld"><input type="text" id="note" list="notes" placeholder="ملاحظة (اختياري) مثل: غداء مع الأصدقاء" value="${esc(src?.note ?? src?.merchant ?? '')}" maxlength="120">
     <datalist id="notes">${[...new Set(S.d.tx.map(x => x.note).filter(Boolean))].slice(-60).map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
     <div class="btns">${t ? '<button class="btn d" data-act="del">حذف</button>' : ''}<button class="btn p" data-act="save">حفظ</button>${t ? '' : '<button class="btn" data-act="saveMore">حفظ وإضافة آخر</button>'}</div>`);
   paintForm(); if (!t) setTimeout(() => $('#amt')?.focus(), 150);
@@ -421,6 +443,7 @@ function saveForm(more) {
   F.date = $('#date').value || todayStr();
   const rec = {type: F.type, amount: Math.round(amt * 100) / 100, cat: F.cat, note: $('#note').value.trim(), date: F.date};
   if (F.id) Object.assign(S.d.tx.find(x => x.id === F.id), rec); else S.d.tx.push({id: uid(), ts: Date.now(), ...rec});
+  if (F.pid) { S.d.pending = S.d.pending.filter(x => x.id !== F.pid); learn(F.merchant, rec.cat); }
   save(); render();
   if (more) { openForm(); toast('تم الحفظ ✓'); } else { closeSheet(); toast('تم الحفظ ✓'); }
 }
@@ -508,6 +531,12 @@ document.addEventListener('click', e => {
         S.d.tx.forEach(t => { if (t.cat === F.cid) t.cat = other.id; });
         S.d.cats = S.d.cats.filter(c => c.id !== F.cid); save(); catsSheet(); render(); }
       break; }
+    case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else AndroidBridge.requestSms(); break;
+    case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const n = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(n ? 'أُضيفت للمراجعة في الرئيسية' : 'لم أتعرف على عملية مالية في هذه الرسالة'); S.tab = 'home'; render(); }); break;
+    case 'pok': confirmPending(D.id); break;
+    case 'pno': S.d.pending = S.d.pending.filter(x => x.id !== D.id); save(); render(); break;
+    case 'pall': [...S.d.pending].forEach(x => confirmPending(x.id, true)); toast('تم تأكيد كل العمليات'); break;
+    case 'pedit': { const x = S.d.pending.find(y => y.id === D.id); openForm(null, x); break; }
     case 'install': window.__pwa.prompt(); break;
     case 'demo': demo(); break;
   }
@@ -535,6 +564,34 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__pwa = {prompt: () => e.prompt()}; if (S.tab === 'more') render(); });
 
+/* ============ قراءة رسائل البنك ============ */
+const mkey = m => String(m || '').toLowerCase().replace(/\s+/g, ' ').trim();
+function learn(merchant, cat) { const k = mkey(merchant); if (k) S.d.merchants[k] = cat; }
+function ingestSms(list) {
+  let added = 0;
+  list.forEach(m => {
+    const key = (m.sender || '') + '|' + m.ts + '|' + String(m.body).length + '|' + String(m.body).slice(0, 40);
+    if (S.d.seen.includes(key)) return;
+    const r = SmsParser.parseSms(m.body, m.ts); S.d.seen.push(key);
+    if (!r) return;
+    const k = mkey(r.merchant); if (r.type === 'exp' && S.d.merchants[k]) r.cat = S.d.merchants[k];
+    S.d.pending.push({id: uid(), sender: m.sender, ...r}); added++;
+  });
+  S.d.seen = S.d.seen.slice(-400); save(); return added;
+}
+function confirmPending(id, quiet) {
+  const x = S.d.pending.find(y => y.id === id); if (!x) return;
+  S.d.tx.push({id: uid(), ts: Date.now(), type: x.type, amount: x.amount, cat: x.cat, note: x.merchant || '', date: x.date});
+  learn(x.merchant, x.cat); S.d.pending = S.d.pending.filter(y => y.id !== id); save(); render();
+  if (!quiet) toast('تم تسجيل العملية ✓');
+}
+function pullSms() {
+  if (!window.AndroidBridge) return;
+  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast('وصلت عملية جديدة للمراجعة 📩'); } } catch (e) {}
+}
+window.smsStatusChanged = () => { render(); pullSms(); };
+if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', pullSms); }
+
 /* بيانات تجريبية */
 function demo() {
   const items = [['food', 18, 45, 'قهوة وإفطار'], ['groc', 90, 320, 'بقالة'], ['trans', 40, 180, 'بنزين'], ['bills', 150, 600, 'فواتير'], ['shop', 80, 700, 'ملابس'], ['fun', 40, 250, 'سينما'], ['health', 60, 300, 'صيدلية'], ['food', 35, 120, 'غداء']];
@@ -550,7 +607,7 @@ function demo() {
 }
 
 /* تشغيل */
-load(); applyTheme(); render();
+load(); applyTheme(); render(); pullSms();
 if ('serviceWorker' in navigator && /^https:|localhost|127\.0\.0\.1/.test(location.protocol + location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 window.__app = {S, render};
 </script>
