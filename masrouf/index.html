@@ -58,7 +58,7 @@ small{font-weight:500}
 .list{display:grid}
 .day{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;font-weight:600;padding:14px 4px 6px}
 .tx{display:flex;align-items:center;gap:12px;padding:11px 12px;background:var(--card);border-radius:14px;margin-bottom:6px;width:100%;text-align:start;box-shadow:var(--shadow)}
-.tx .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:21px;flex:none}
+.tx .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:none}
 .tx .t{flex:1;min-width:0}.tx .t b{display:block;font-weight:600;font-size:15px}
 .tx .t span{display:block;font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx .a{font-weight:700;white-space:nowrap}.tx .a.inc{color:var(--inc)}
@@ -93,8 +93,8 @@ small{font-weight:500}
 .tabs{position:fixed;bottom:0;inset-inline:0;z-index:25;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
 .tabs .in{display:flex;width:100%;max-width:720px}
 .tabs button{flex:1;display:grid;justify-items:center;gap:1px;padding:6px 0;color:var(--mute);font-size:11.5px;font-weight:500}
-.tabs button .e{font-size:21px;filter:grayscale(1);opacity:.7}
-.tabs button.on{color:var(--pri);font-weight:700}.tabs button.on .e{filter:none;opacity:1}
+.tabs button .e{display:grid;place-items:center;height:26px}
+.tabs button.on{color:var(--pri);font-weight:700}
 .tabs .gap{flex:.9}
 .ov{position:fixed;inset:0;background:rgba(2,12,12,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:f .15s}
 .sheet{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:26px 26px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));animation:u .22s ease-out}
@@ -107,7 +107,7 @@ small{font-weight:500}
 .amt.inc input{color:var(--inc)}.amt.exp input{color:var(--exp)}
 .cg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 12px}
 .cg button{background:var(--card);border-radius:14px;padding:10px 2px;display:grid;justify-items:center;gap:3px;font-size:11.5px;border:2px solid transparent;line-height:1.25;text-align:center}
-.cg button .e{font-size:24px}
+.cg button .e{display:grid;place-items:center;height:26px}
 .cg button.on{border-color:var(--pri);background:var(--pri-soft);font-weight:600}
 .fld{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
 .chip{padding:8px 14px;border-radius:99px;background:var(--card);font-size:13.5px;font-weight:500;border:2px solid transparent}
@@ -120,7 +120,7 @@ input:focus,select:focus{border-color:var(--pri)}
 .btn.d{color:var(--exp);flex:.5}
 .set{display:grid;gap:2px}
 .set .r{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line);width:100%;text-align:start}
-.set .r:last-child{border:0}.set .r .e{font-size:20px;width:30px;text-align:center}
+.set .r:last-child{border:0}.set .r .e{width:30px;display:grid;place-items:center;color:var(--pri)}
 .set .r b{flex:1;font-weight:500}.set .r span{color:var(--mute);font-size:13px}
 .empty{text-align:center;padding:36px 16px;color:var(--mute)}
 .empty .e{font-size:52px}.empty h3{color:var(--ink);margin:8px 0 4px}
@@ -135,9 +135,19 @@ input:focus,select:focus{border-color:var(--pri)}
 .pend .pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
 .pend .pb .ok{background:var(--pri);color:#fff}.pend .pb .no{color:var(--exp)}
 .pend small.src{color:var(--mute);font-size:11.5px;display:block;margin-top:2px}
-.gh{font-size:12.5px;color:var(--mute);font-weight:600;margin:12px 2px 2px}
+.gh{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute);font-weight:600;margin:12px 2px 2px}
 .sub{padding-inline-start:18px;color:var(--mute);font-size:12.5px;display:flex;justify-content:space-between}
 .chips2{display:flex;gap:6px;margin-bottom:10px}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 12px;direction:ltr}
+.kp button{height:52px;border-radius:14px;background:var(--card);font-size:23px;font-weight:600;box-shadow:var(--shadow);display:grid;place-items:center}
+.kp button:active{transform:scale(.95);background:var(--pri-soft)}
+.kp .op{background:var(--pri-soft);color:var(--pri)}.kp .bk{color:var(--exp)}
+.hint2{color:var(--mute);font-size:13px;min-height:18px;margin:-6px 4px 4px}
+.srch{margin:2px 0 6px}.amt input[readonly]{cursor:default}
+.gbtn{width:100%;background:none;text-align:start;margin-top:8px;color:var(--mute)}.gbtn .cnt{background:var(--line);border-radius:99px;padding:0 8px;font-size:11px}
+.gbtn .chev{margin-inline-start:auto;display:grid;transition:transform .2s}.gbtn .chev.up{transform:rotate(180deg)}
+.allbtn{display:flex;align-items:center;gap:6px;margin:4px 2px 2px}
+.gh svg,.leg .h svg{flex:none}.leg .h svg{width:17px;height:17px}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -151,20 +161,21 @@ input:focus,select:focus{border-color:var(--pri)}
 </head>
 <body>
 <div id="app">
-  <header class="top"><div><h1><i></i>مصروفي</h1></div><div class="sub" id="topSub"></div></header>
+  <header class="top"><div><h1><svg width="32" height="32" viewBox="0 0 512 512"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b5f59"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g transform="translate(256 256) rotate(-90)" fill="none" stroke-width="54"><circle r="118" stroke="#fff" stroke-opacity=".22"/><circle r="118" stroke="#fff" stroke-linecap="round" stroke-dasharray="430 800"/><circle r="118" stroke="#fcd34d" stroke-linecap="round" stroke-dasharray="90 800" stroke-dashoffset="-470"/></g><circle cx="256" cy="256" r="36" fill="#fff"/><circle cx="256" cy="256" r="16" fill="#0f766e"/></svg>مصروفي</h1></div><div class="sub" id="topSub"></div></header>
   <main id="view" class="view"></main>
 </div>
 <button class="fab" data-act="add" aria-label="إضافة عملية">+</button>
 <nav class="tabs"><div class="in">
-  <button data-tab="home"><span class="e">🏠</span>الرئيسية</button>
-  <button data-tab="log"><span class="e">🧾</span>السجل</button>
+  <button data-tab="home"><span class="e" data-i="house"></span>الرئيسية</button>
+  <button data-tab="log"><span class="e" data-i="receipt"></span>السجل</button>
   <span class="gap"></span>
-  <button data-tab="rep"><span class="e">📊</span>التقارير</button>
-  <button data-tab="more"><span class="e">⚙️</span>المزيد</button>
+  <button data-tab="rep"><span class="e" data-i="chart-column"></span>التقارير</button>
+  <button data-tab="more"><span class="e" data-i="settings"></span>المزيد</button>
 </div></nav>
 <div id="layer"></div>
 <input type="file" id="file" accept=".json,application/json" hidden>
 
+<script src="icons.js"></script>
 <script src="sms-parser.js"></script>
 <script>
 'use strict';
@@ -175,59 +186,59 @@ const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const PALETTE = ['#f97316','#16a34a','#0ea5e9','#8b5cf6','#eab308','#ef4444','#6366f1','#ec4899','#14b8a6','#f43f5e','#a855f7','#64748b'];
 const GROUPS = [
-  {id:'food',name:'الطعام',icon:'🍽️',color:'#f97316'},
-  {id:'house',name:'السكن والبيت',icon:'🏠',color:'#8b5cf6'},
-  {id:'trans',name:'المواصلات والسيارة',icon:'🚗',color:'#0ea5e9'},
-  {id:'parents',name:'مصاريف الأهل',icon:'🤝',color:'#0d9488'},
-  {id:'family',name:'الأسرة',icon:'👨‍👩‍👧',color:'#a855f7'},
-  {id:'shop',name:'التسوق والشخصي',icon:'🛍️',color:'#ec4899'},
-  {id:'health',name:'الصحة والتعليم',icon:'💊',color:'#ef4444'},
-  {id:'fun',name:'الترفيه والسفر',icon:'🎬',color:'#eab308'},
-  {id:'fin',name:'المالية والالتزامات',icon:'💳',color:'#b45309'},
-  {id:'other',name:'أخرى',icon:'📦',color:'#64748b'}
+  {id:'food',name:'الطعام',icon:'utensils',color:'#f97316'},
+  {id:'house',name:'السكن والبيت',icon:'house',color:'#8b5cf6'},
+  {id:'trans',name:'المواصلات والسيارة',icon:'car',color:'#0ea5e9'},
+  {id:'parents',name:'مصاريف الأهل',icon:'handshake',color:'#0d9488'},
+  {id:'family',name:'الأسرة',icon:'users',color:'#a855f7'},
+  {id:'shop',name:'التسوق والشخصي',icon:'shopping-bag',color:'#ec4899'},
+  {id:'health',name:'الصحة والتعليم',icon:'heart-pulse',color:'#ef4444'},
+  {id:'fun',name:'الترفيه والسفر',icon:'ticket',color:'#eab308'},
+  {id:'fin',name:'المالية والالتزامات',icon:'wallet',color:'#b45309'},
+  {id:'other',name:'أخرى',icon:'package',color:'#64748b'}
 ];
 const DEF_CATS = [
-  {id:'food',group:'food',name:'مطاعم وقهوة',icon:'🍽️',color:'#f97316'},
-  {id:'groc',group:'food',name:'بقالة ومواد غذائية',icon:'🛒',color:'#16a34a'},
-  {id:'home',group:'house',name:'سكن وإيجار',icon:'🏠',color:'#8b5cf6'},
-  {id:'bills',group:'house',name:'فواتير وخدمات',icon:'💡',color:'#eab308'},
-  {id:'repair',group:'house',name:'صيانة منزلية',icon:'🔧',color:'#78716c'},
-  {id:'furn',group:'house',name:'أثاث ومستلزمات البيت',icon:'🛋️',color:'#a16207'},
-  {id:'laundry',group:'house',name:'غسيل ملابس',icon:'🧺',color:'#38bdf8'},
-  {id:'trans',group:'trans',name:'وقود',icon:'⛽',color:'#0ea5e9'},
-  {id:'car',group:'trans',name:'السيارة وصيانتها',icon:'🚘',color:'#0369a1'},
-  {id:'carins',group:'trans',name:'تأمين السيارة',icon:'🛡️',color:'#1e40af'},
-  {id:'taxi',group:'trans',name:'أجرة ومواصلات',icon:'🚕',color:'#f59e0b'},
-  {id:'fines',group:'trans',name:'سداد مخالفات',icon:'🚨',color:'#dc2626'},
-  {id:'parentm',group:'parents',name:'المصروف الشهري للأهل',icon:'💸',color:'#0891b2'},
-  {id:'parente',group:'parents',name:'مناسبات الأهل',icon:'🎉',color:'#c026d3'},
-  {id:'parentx',group:'parents',name:'طوارئ الأهل',icon:'🆘',color:'#e11d48'},
-  {id:'fam',group:'family',name:'الأسرة والأطفال',icon:'👨‍👩‍👧',color:'#a855f7'},
-  {id:'gift',group:'family',name:'هدايا ومناسبات',icon:'🎁',color:'#f43f5e'},
-  {id:'personal',group:'family',name:'مصروف شخصي',icon:'👤',color:'#0284c7'},
-  {id:'shop',group:'shop',name:'تسوق وملابس وأحذية',icon:'🛍️',color:'#ec4899'},
-  {id:'tech',group:'shop',name:'إلكترونيات وجوالات',icon:'📱',color:'#2563eb'},
-  {id:'acc',group:'shop',name:'إكسسوارات',icon:'💍',color:'#d946ef'},
-  {id:'care',group:'shop',name:'عناية شخصية وحلاقة',icon:'💇',color:'#db2777'},
-  {id:'sport',group:'shop',name:'رياضة ولياقة',icon:'🏋️',color:'#ea580c'},
-  {id:'health',group:'health',name:'صحة ودواء',icon:'💊',color:'#ef4444'},
-  {id:'medins',group:'health',name:'تأمين طبي',icon:'🩺',color:'#475569'},
-  {id:'edu',group:'health',name:'تعليم ودورات وكتب',icon:'🎓',color:'#6366f1'},
-  {id:'fun',group:'fun',name:'ترفيه وخروجات',icon:'🎬',color:'#14b8a6'},
-  {id:'subs',group:'fun',name:'اشتراكات رقمية',icon:'📺',color:'#7c3aed'},
-  {id:'travel',group:'fun',name:'سفر وسياحة',icon:'✈️',color:'#0891b2'},
-  {id:'loan',group:'fin',name:'أقساط وديون',icon:'💳',color:'#b45309'},
-  {id:'charity',group:'fin',name:'زكاة وصدقات',icon:'🤲',color:'#059669'},
-  {id:'gov',group:'fin',name:'رسوم حكومية',icon:'🏛️',color:'#0f766e'},
-  {id:'other',group:'other',name:'أخرى',icon:'📦',color:'#64748b'}
+  {id:'food',group:'food',name:'مطاعم وقهوة',icon:'utensils',color:'#f97316'},
+  {id:'groc',group:'food',name:'بقالة ومواد غذائية',icon:'shopping-cart',color:'#16a34a'},
+  {id:'home',group:'house',name:'سكن وإيجار',icon:'house',color:'#8b5cf6'},
+  {id:'bills',group:'house',name:'فواتير وخدمات',icon:'lightbulb',color:'#eab308'},
+  {id:'repair',group:'house',name:'صيانة منزلية',icon:'wrench',color:'#78716c'},
+  {id:'furn',group:'house',name:'أثاث ومستلزمات البيت',icon:'sofa',color:'#a16207'},
+  {id:'laundry',group:'house',name:'غسيل ملابس',icon:'shirt',color:'#38bdf8'},
+  {id:'trans',group:'trans',name:'وقود',icon:'fuel',color:'#0ea5e9'},
+  {id:'car',group:'trans',name:'السيارة وصيانتها',icon:'car',color:'#0369a1'},
+  {id:'carins',group:'trans',name:'تأمين السيارة',icon:'shield-check',color:'#1e40af'},
+  {id:'taxi',group:'trans',name:'أجرة ومواصلات',icon:'car-taxi-front',color:'#f59e0b'},
+  {id:'fines',group:'trans',name:'سداد مخالفات',icon:'triangle-alert',color:'#dc2626'},
+  {id:'parentm',group:'parents',name:'المصروف الشهري للأهل',icon:'hand-coins',color:'#0891b2'},
+  {id:'parente',group:'parents',name:'مناسبات الأهل',icon:'party-popper',color:'#c026d3'},
+  {id:'parentx',group:'parents',name:'طوارئ الأهل',icon:'siren',color:'#e11d48'},
+  {id:'fam',group:'family',name:'الأسرة والأطفال',icon:'users',color:'#a855f7'},
+  {id:'gift',group:'family',name:'هدايا ومناسبات',icon:'gift',color:'#f43f5e'},
+  {id:'personal',group:'family',name:'مصروف شخصي',icon:'user',color:'#0284c7'},
+  {id:'shop',group:'shop',name:'تسوق وملابس وأحذية',icon:'shopping-bag',color:'#ec4899'},
+  {id:'tech',group:'shop',name:'إلكترونيات وجوالات',icon:'smartphone',color:'#2563eb'},
+  {id:'acc',group:'shop',name:'إكسسوارات',icon:'gem',color:'#d946ef'},
+  {id:'care',group:'shop',name:'عناية شخصية وحلاقة',icon:'scissors',color:'#db2777'},
+  {id:'sport',group:'shop',name:'رياضة ولياقة',icon:'dumbbell',color:'#ea580c'},
+  {id:'health',group:'health',name:'صحة ودواء',icon:'pill',color:'#ef4444'},
+  {id:'medins',group:'health',name:'تأمين طبي',icon:'heart-pulse',color:'#475569'},
+  {id:'edu',group:'health',name:'تعليم ودورات وكتب',icon:'graduation-cap',color:'#6366f1'},
+  {id:'fun',group:'fun',name:'ترفيه وخروجات',icon:'clapperboard',color:'#14b8a6'},
+  {id:'subs',group:'fun',name:'اشتراكات رقمية',icon:'tv',color:'#7c3aed'},
+  {id:'travel',group:'fun',name:'سفر وسياحة',icon:'plane',color:'#0891b2'},
+  {id:'loan',group:'fin',name:'أقساط وديون',icon:'credit-card',color:'#b45309'},
+  {id:'charity',group:'fin',name:'زكاة وصدقات',icon:'hand-heart',color:'#059669'},
+  {id:'gov',group:'fin',name:'رسوم حكومية',icon:'landmark',color:'#0f766e'},
+  {id:'other',group:'other',name:'أخرى',icon:'package',color:'#64748b'}
 ];
 const REMOVED = {pet: 'other', maid: 'other', ins: 'medins'};
 const INC_CATS = [
-  {id:'salary',name:'راتب',icon:'💼',color:'#16a34a'},
-  {id:'extra',name:'دخل إضافي',icon:'💰',color:'#0d9488'},
-  {id:'iother',name:'إيراد آخر',icon:'➕',color:'#65a30d'}
+  {id:'salary',name:'راتب',icon:'briefcase',color:'#16a34a'},
+  {id:'extra',name:'دخل إضافي',icon:'coins',color:'#0d9488'},
+  {id:'iother',name:'إيراد آخر',icon:'circle-plus',color:'#65a30d'}
 ];
-const ICONS = ['🍽️','☕','🛒','⛽','🚗','🏠','💡','📱','💊','🏥','🎓','📚','🛍️','👕','🎬','🎮','🎁','✈️','🐾','🧾','💇','🏋️','👨‍👩‍👧','🕌','💳','🔧','📦','💰'];
+const ICONS = ['utensils','coffee','pizza','cake','shopping-cart','shopping-bag','shirt','gem','fuel','car','bus','bike','house','sofa','wrench','lightbulb','droplets','flame','wifi','phone','smartphone','pill','stethoscope','heart-pulse','graduation-cap','book-open','clapperboard','gamepad-2','music','tv','gift','plane','map-pin','paw-print','cat','baby','users','scissors','dumbbell','credit-card','wallet','coins','landmark','hand-heart','star','package'];
 const pad = x => String(x).padStart(2, '0');
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parse = s => { const [a,b,c] = s.split('-').map(Number); return new Date(a, b-1, c); };
@@ -239,10 +250,14 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b'], rec: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5'], rec: []
 });
 function migrate() {
   S.d.migr = S.d.migr || []; S.d.rec = S.d.rec || []; S.d.pending = S.d.pending || []; S.d.merchants = S.d.merchants || {};
+  if (!S.d.migr.includes('v5') && S.d.migr.includes('v4')) {
+    S.d.cats.forEach(c => { const d = DEF_CATS.find(x => x.id === c.id); if (d && !ICON_SVG[c.icon]) c.icon = d.icon; });
+    S.d.migr.push('v5');
+  }
   if (S.d.migr.includes('v4')) {
     if (!S.d.migr.includes('v4b')) { if (!S.d.cats.some(c => c.id === 'personal')) { const i = S.d.cats.findIndex(c => c.id === 'gift'), d = DEF_CATS.find(c => c.id === 'personal');
       S.d.cats.splice(i < 0 ? S.d.cats.length - 1 : i + 1, 0, {...d, budget: 0}); } S.d.migr.push('v4b'); }
@@ -255,7 +270,7 @@ function migrate() {
   const out = DEF_CATS.map(d => byId[d.id] ? {...byId[d.id], name: d.name, group: d.group} : {...d, budget: 0});
   const custom = old.filter(c => !ids.includes(c.id) && !REMOVED[c.id]).map(c => ({...c, group: c.group || 'other'}));
   out.splice(out.length - 1, 0, ...custom);
-  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b'];
+  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b', 'v5'];
 }
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date(), by: 'cat'}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
@@ -269,7 +284,7 @@ const dg = s => S.d.set.digits === 'ar' ? String(s).replace(/\d/g, d => AR_DIG[d
 const num = (x, dec = 2) => (x < 0 ? '\u200E' : '') + dg((Math.round(x * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: dec}));
 const money = x => `<span class="m">${num(x)}</span> <small>${esc(S.d.set.cur)}</small>`;
 const sign = (t, x) => (t === 'inc' ? '+' : '−') + num(x);
-const catOf = id => S.d.cats.find(c => c.id === id) || INC_CATS.find(c => c.id === id) || {id, name: 'فئة محذوفة', icon: '❔', color: '#94a3b8'};
+const catOf = id => S.d.cats.find(c => c.id === id) || INC_CATS.find(c => c.id === id) || {id, name: 'فئة محذوفة', icon: 'package', color: '#94a3b8'};
 const todayStr = () => ymd(new Date());
 const nowTime = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const fmtTime = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return dg(`${h % 12 || 12}:${pad(m)}`) + (h < 12 ? ' ص' : ' م'); };
@@ -315,7 +330,7 @@ function groupByCat(list) {
 function txRow(t) {
   const c = catOf(t.cat);
   return `<button class="tx" data-act="edit" data-id="${t.id}">
-    <span class="ic" style="background:${c.color}22">${c.icon}</span>
+    <span class="ic" style="background:${c.color}22;color:${c.color}">${I(c.icon)}</span>
     <span class="t"><b>${esc(c.name)}</b><span>${t.time ? fmtTime(t.time) + ' · ' : ''}${esc(t.note) || '—'}${t.auto ? ' · 📩' : ''}${t.rec ? ' · 🔁' : ''}</span></span>
     <span class="a ${t.type}">${sign(t.type, t.amount)} <small>${esc(S.d.set.cur)}</small></span></button>`;
 }
@@ -343,7 +358,7 @@ const pctBadge = (cur, prev) => {
 function pendingCard() {
   const p = S.d.pending; if (!p.length) return '';
   return `<section class="card pend"><h3>📩 بانتظار المراجعة (${dg(p.length)})</h3>${p.map(x => { const c = catOf(x.cat);
-    return `<div class="tx"><div class="top2"><span class="ic" style="background:${c.color}22">${c.icon}</span>
+    return `<div class="tx"><div class="top2"><span class="ic" style="background:${c.color}22;color:${c.color}">${I(c.icon)}</span>
     <span class="t"><b>${esc(x.merchant || c.name)}</b><span>${esc(c.name)} · ${dayLabel(x.date)}${x.time ? ' · ' + fmtTime(x.time) : ''}</span></span>
     <span class="a ${x.type}">${sign(x.type, x.amount)} <small>${esc(S.d.set.cur)}</small></span></div>
     <div class="pb"><button class="ok" data-act="pok" data-id="${x.id}">تأكيد</button><button data-act="pedit" data-id="${x.id}">تعديل</button><button class="no" data-act="pno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}
@@ -371,7 +386,7 @@ function viewHome() {
   return `${pendingCard()}<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
     <div class="big m">${num(spent)} <small>${esc(set.cur)}</small></div>${budgetHtml}
     <div class="row" style="margin-top:12px"><div class="mini">اليوم<b>${num(today, 0)}</b></div><div class="mini">الدخل<b>${num(inc, 0)}</b></div><div class="mini">الصافي<b>${num(inc - spent, 0)}</b></div></div></section>
-    ${cats.length ? `<section class="card"><h3>أكثر الفئات صرفاً هذا الشهر <a data-tab="rep">التفاصيل</a></h3><div class="leg">${cats.map(c => `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${c.icon} ${esc(c.name)}</b><strong>${money(c.v)}</strong></div><div class="bar"><i style="width:${c.v / tot * 100}%;background:${c.color}"></i></div></div>`).join('')}</div></section>` : ''}
+    ${cats.length ? `<section class="card"><h3>أكثر الفئات صرفاً هذا الشهر <a data-tab="rep">التفاصيل</a></h3><div class="leg">${cats.map(c => `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${I(c.icon)} ${esc(c.name)}</b><strong>${money(c.v)}</strong></div><div class="bar"><i style="width:${c.v / tot * 100}%;background:${c.color}"></i></div></div>`).join('')}</div></section>` : ''}
     <section><div class="day"><span>آخر العمليات</span><a class="link" data-tab="log">عرض الكل</a></div>${recent.map(txRow).join('')}</section>`;
 }
 
@@ -383,7 +398,7 @@ function viewLog() {
   const groups = {}; list.forEach(t => (groups[t.date] ||= []).push(t));
   return `<div class="filters"><input type="search" id="q" placeholder="🔍 ابحث في الملاحظات والفئات" value="${esc(f.q)}">
     <select id="fm"><option value="">كل الشهور</option>${months.map(m => { const [y, mm] = m.split('-'); return `<option value="${m}" ${f.month === m ? 'selected' : ''}>${MONTHS[mm - 1]} ${dg(y)}</option>`; }).join('')}</select>
-    <select id="fc"><option value="">كل الفئات</option>${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<optgroup label="${g.icon} ${g.name}">${cs.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}<optgroup label="الدخل">${INC_CATS.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup></select></div>
+    <select id="fc"><option value="">كل الفئات</option>${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<optgroup label="${g.name}">${cs.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}<optgroup label="الدخل">${INC_CATS.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup></select></div>
     <div class="hint" style="color:var(--mute);font-size:13px">${dg(list.length)} عملية · المصروف ${money(sum(list))}${sum(list, 'inc') ? ' · الدخل ' + money(sum(list, 'inc')) : ''}</div>
     ${list.length ? Object.keys(groups).map(d => `<div><div class="day"><span>${dayLabel(d)}</span><span>${money(sum(groups[d]))}</span></div>${groups[d].map(txRow).join('')}</div>`).join('') :
       '<div class="card empty"><div class="e">🔎</div><h3>لا توجد نتائج</h3></div>'}`;
@@ -425,8 +440,8 @@ function viewRep() {
       ${kpi('الصافي', `<span style="color:var(--${inc - spent >= 0 ? 'inc' : 'exp'})">${money(inc - spent)}</span>`)}${kpi(avgLabel, money(avg))}
       ${kpi('عدد العمليات', dg(exps.length))}${kpi('أكبر مصروف', biggest[0] ? money(biggest[0].amount) : '—')}</div>
     ${cats.length ? `<section class="card"><h3>توزيع المصروفات</h3><div class="chips2 noprint"><button class="chip ${by === 'cat' ? 'on' : ''}" data-by="cat">حسب الفئة</button><button class="chip ${by === 'group' ? 'on' : ''}" data-by="group">حسب القسم</button></div><div class="donutwrap">${donut(by === 'group' ? gs : cats, spent, 'المجموع')}
-      <div class="leg">${by === 'group' ? gs.map(g => `<div class="it"><div class="h"><i class="dot" style="background:${g.color}"></i><b>${g.icon} ${esc(g.name)}</b><span>${dg((g.v / spent * 100).toFixed(0))}%</span><strong>${money(g.v)}</strong></div><div class="bar"><i style="width:${g.v / gs[0].v * 100}%;background:${g.color}"></i></div>${g.items.map(c => `<div class="sub"><span>${c.icon} ${esc(c.name)}</span><span>${num(c.v, 0)}</span></div>`).join('')}</div>`).join('') : cats.map(c => { const b = mode === 'month' && c.budget > 0 ? c.budget : 0, bp = b ? c.v / b * 100 : 0;
-        return `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${c.icon} ${esc(c.name)}</b><span>${dg((c.v / spent * 100).toFixed(0))}%</span><strong>${money(c.v)}</strong></div>
+      <div class="leg">${by === 'group' ? gs.map(g => `<div class="it"><div class="h"><i class="dot" style="background:${g.color}"></i><b>${I(g.icon)} ${esc(g.name)}</b><span>${dg((g.v / spent * 100).toFixed(0))}%</span><strong>${money(g.v)}</strong></div><div class="bar"><i style="width:${g.v / gs[0].v * 100}%;background:${g.color}"></i></div>${g.items.map(c => `<div class="sub"><span>${I(c.icon)} ${esc(c.name)}</span><span>${num(c.v, 0)}</span></div>`).join('')}</div>`).join('') : cats.map(c => { const b = mode === 'month' && c.budget > 0 ? c.budget : 0, bp = b ? c.v / b * 100 : 0;
+        return `<div class="it"><div class="h"><i class="dot" style="background:${c.color}"></i><b>${I(c.icon)} ${esc(c.name)}</b><span>${dg((c.v / spent * 100).toFixed(0))}%</span><strong>${money(c.v)}</strong></div>
         <div class="bar ${bp >= 100 ? 'bad' : bp >= 80 ? 'warn' : ''}"><i style="width:${b ? Math.min(bp, 100) : c.v / cats[0].v * 100}%;background:${bp >= 100 ? '' : c.color}"></i></div>${b ? `<span class="hint">الميزانية ${num(b, 0)} · ${bp >= 100 ? 'تجاوزتها' : 'المتبقي ' + num(b - c.v, 0)}</span>` : ''}</div>`; }).join('')}</div></div></section>` : ''}
     ${chart ? `<section class="card"><h3>${mode === 'month' ? 'المصروف اليومي' : 'المصروف الشهري'}</h3>${chart}</section>` : ''}
     ${biggest.length ? `<section><div class="day"><span>أكبر ${dg(biggest.length)} مصروفات</span></div>${biggest.map(txRow).join('')}</section>` : ''}
@@ -435,24 +450,24 @@ function viewRep() {
 
 function viewMore() {
   const set = S.d.set, themes = {auto: 'تلقائي', light: 'فاتح', dark: 'داكن'};
-  const row = (e, t, v, act) => `<button class="r" data-act="${act}"><span class="e">${e}</span><b>${t}</b><span>${v || ''}</span></button>`;
+  const row = (e, t, v, act) => `<button class="r" data-act="${act}"><span class="e">${I(e, 22)}</span><b>${t}</b><span>${v || ''}</span></button>`;
   return `<section class="card set"><h3>الميزانية والعرض</h3>
-    ${row('🎯', 'ميزانية الشهر', set.budget ? num(set.budget, 0) + ' ' + esc(set.cur) : 'غير محددة', 'budget')}
-    ${row('💱', 'العملة', esc(set.cur), 'currency')}
-    ${row('🔢', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
-    ${row('🌓', 'المظهر', themes[set.theme], 'theme')}
-    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('📩', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('📤', 'من تطبيق الرسائل: شارك الرسالة إلى مصروفي', '', 'sharehelp')) : ''}
-    ${row('⚡', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
-    ${row('📋', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
-    ${row('🔁', 'المصاريف المتكررة', dg(S.d.rec.length) + ' بند', 'recs')}
-    ${row('🏷️', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
+    ${row('target', 'ميزانية الشهر', set.budget ? num(set.budget, 0) + ' ' + esc(set.cur) : 'غير محددة', 'budget')}
+    ${row('arrow-left-right', 'العملة', esc(set.cur), 'currency')}
+    ${row('hash', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
+    ${row('moon-star', 'المظهر', themes[set.theme], 'theme')}
+    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('mail-check', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('share-2', 'من تطبيق الرسائل: شارك الرسالة إلى مصروفي', '', 'sharehelp')) : ''}
+    ${row('zap', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
+    ${row('clipboard-list', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
+    ${row('repeat', 'المصاريف المتكررة', dg(S.d.rec.length) + ' بند', 'recs')}
+    ${row('tags', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
     <section class="card set"><h3>البيانات والنسخ الاحتياطي</h3>
-    ${row('📄', 'تصدير كل العمليات (Excel / CSV)', '', 'csv')}
-    ${row('💾', 'نسخة احتياطية (ملف JSON)', '', 'backup')}
-    ${row('📥', 'استرجاع نسخة احتياطية', '', 'restore')}
-    ${row('🗑️', 'مسح كل البيانات', '', 'wipe')}</section>
+    ${row('file-spreadsheet', 'تصدير كل العمليات (Excel / CSV)', '', 'csv')}
+    ${row('save', 'نسخة احتياطية (ملف JSON)', '', 'backup')}
+    ${row('download', 'استرجاع نسخة احتياطية', '', 'restore')}
+    ${row('trash-2', 'مسح كل البيانات', '', 'wipe')}</section>
     <section class="card set"><h3>التطبيق</h3>
-    ${window.__pwa ? row('📲', 'ثبّت التطبيق على الشاشة الرئيسية', '', 'install') : ''}
+    ${window.__pwa ? row('smartphone', 'ثبّت التطبيق على الشاشة الرئيسية', '', 'install') : ''}
     <div class="hint" style="padding:6px 4px;line-height:1.9">بياناتك محفوظة على جوالك فقط ولا تُرسل لأي جهة. خذ نسخة احتياطية من وقت لآخر، فمسح بيانات المتصفح يحذفها.<br>عدد العمليات المسجّلة ${dg(S.d.tx.length)}</div></section>`;
 }
 
@@ -469,40 +484,76 @@ function sheet(html) {
 const closeSheet = () => { $('#layer').innerHTML = ''; };
 
 let F = {}; // حالة نموذج الإضافة
+function calc(v) {
+  const e = String(v || '').replace(/×/g, '*').replace(/−/g, '-').replace(/[+\-*]+$/, '');
+  if (!e || !/^[0-9.+\-*]+$/.test(e)) return null;
+  try { const r = Function('"use strict";return (' + e + ')')(); return isFinite(r) ? Math.round(r * 100) / 100 : null; } catch (x) { return null; }
+}
+function kp(k) {
+  const el = $('#amt'); if (!el) return; let v = el.value;
+  if (k === 'bk') v = v.slice(0, -1);
+  else if (k === '=') { const r = calc(v); if (r !== null) v = String(r); }
+  else if ('+−×'.includes(k)) { if (v) v = /[+−×]$/.test(v) ? v.slice(0, -1) + k : v + k; }
+  else if (k === '.') { const last = v.split(/[+−×]/).pop(); if (!last.includes('.')) v += last === '' ? '0.' : '.'; }
+  else if (v.length < 14) v += k;
+  el.value = v; amtHint();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+function amtHint() {
+  const v = $('#amt').value, h = $('#amtHint'); if (!h) return;
+  h.textContent = /[+−×]/.test(v) && calc(v) !== null ? '= ' + num(calc(v)) + ' ' + S.d.set.cur : '';
+}
 function openForm(id, pre) {
   let t = id ? S.d.tx.find(x => x.id === id) : null;
   if (pre) t = null;
   const src = t || pre;
-  F = {id, pid: pre?.id, merchant: pre?.merchant, type: src?.type || 'exp', cat: src?.cat || null, date: src?.date || todayStr(), time: src ? (src.time || '') : nowTime()};
+  F = {id, pid: pre?.id, merchant: pre?.merchant, type: src?.type || 'exp', cat: src?.cat || null, date: src?.date || todayStr(), time: src ? (src.time || '') : nowTime(), q: '', all: false, open: {}};
+  const keys = ['7', '8', '9', 'bk', '4', '5', '6', '+', '1', '2', '3', '−', '.', '0', '×', '='];
   sheet(`<div class="sh"><b>${t ? 'تعديل العملية' : 'إضافة عملية'}</b><button class="x" data-act="close">✕</button></div>
     <div class="seg" id="tseg"><button data-type="exp">مصروف</button><button data-type="inc">دخل</button></div>
-    <div class="amt" id="amtBox"><input id="amt" inputmode="decimal" autocomplete="off" placeholder="0" value="${src ? src.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
+    <div class="amt" id="amtBox"><input id="amt" readonly inputmode="none" autocomplete="off" placeholder="0" value="${src ? src.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
+    <div class="hint2" id="amtHint"></div>
+    <div class="kp">${keys.map(k => `<button data-k="${k}" class="${'+−×='.includes(k) ? 'op' : k === 'bk' ? 'bk' : ''}">${k === 'bk' ? ic('delete', 22) : k}</button>`).join('')}</div>
+    <div class="srch" id="srch"><input type="search" id="csearch" placeholder="ابحث عن فئة" autocomplete="off"></div>
     <div id="cg"></div>
     <div class="fld" id="dchips"></div>
     <div class="fld"><input type="text" id="note" list="notes" placeholder="ملاحظة (اختياري) مثل: غداء مع الأصدقاء" value="${esc(src?.note ?? src?.merchant ?? '')}" maxlength="120">
     <datalist id="notes">${[...new Set(S.d.tx.map(x => x.note).filter(Boolean))].slice(-60).map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
     <div class="btns">${t ? '<button class="btn d" data-act="del">حذف</button>' : ''}<button class="btn p" data-act="save">حفظ</button>${t ? '' : '<button class="btn" data-act="saveMore">حفظ وإضافة آخر</button>'}</div>`);
-  paintForm(); if (!t) setTimeout(() => $('#amt')?.focus(), 150);
+  paintForm();
 }
 function paintForm() {
   document.querySelectorAll('#tseg button').forEach(b => b.classList.toggle('on', b.dataset.type === F.type));
   $('#amtBox').className = 'amt ' + F.type;
-  const btn = c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e">${c.icon}</span>${esc(c.name)}</button>`;
-  const sec = (title, cs) => `<div class="gh">${title}</div><div class="cg">${cs.map(btn).join('')}</div>`;
-  let all = F.type === 'exp' ? S.d.cats : INC_CATS, html;
-  if (F.type === 'exp') {
-    const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1);
-    const top = S.d.cats.filter(c => cnt[c.id] > 1).sort((a, b) => cnt[b.id] - cnt[a.id]).slice(0, 4);
-    html = (top.length ? sec('⭐ الأكثر استخداماً', top) : '') + GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? sec(`${g.icon} ${g.name}`, cs) : ''; }).join('');
-  } else html = `<div class="cg">${INC_CATS.map(btn).join('')}</div>`;
+  $('#srch').style.display = F.type === 'exp' ? '' : 'none';
+  const all = F.type === 'exp' ? S.d.cats : INC_CATS;
   if (!all.find(c => c.id === F.cat)) F.cat = all[0]?.id;
-  $('#cg').innerHTML = html.replace(new RegExp(`data-cat="${F.cat}" class=""`, 'g'), `data-cat="${F.cat}" class="on"`);
+  paintCats();
   const t = todayStr(), y = ymd(new Date(Date.now() - 864e5));
   $('#dchips').innerHTML = `<button class="chip ${F.date === t ? 'on' : ''}" data-d="${t}">اليوم</button><button class="chip ${F.date === y ? 'on' : ''}" data-d="${y}">أمس</button>
     <input type="date" id="date" value="${F.date}" max="${t}" style="flex:1;min-width:140px"><input type="time" id="time" value="${F.time || ''}" style="width:118px">`;
 }
+function paintCats() {
+  const btn = c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e" style="color:${c.color}">${I(c.icon, 26)}</span>${esc(c.name)}</button>`;
+  let html;
+  if (F.type !== 'exp') html = `<div class="cg">${INC_CATS.map(btn).join('')}</div>`;
+  else if (F.q.trim()) { const m = S.d.cats.filter(c => c.name.includes(F.q.trim()));
+    html = m.length ? `<div class="cg">${m.map(btn).join('')}</div>` : '<div class="hint2">لا توجد فئة بهذا الاسم</div>'; }
+  else {
+    const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1);
+    const top = S.d.cats.filter(c => cnt[c.id] > 0).sort((a, b) => cnt[b.id] - cnt[a.id]).map(c => c.id);
+    const base = top.length ? top : ['food', 'groc', 'trans', 'bills', 'shop', 'fam'];
+    const quick = [...new Set([F.cat, ...base])].filter(Boolean).slice(0, 8).map(id => S.d.cats.find(c => c.id === id)).filter(Boolean);
+    html = `<div class="gh">${ic('star', 14)} ${top.length ? 'الأكثر استخداماً' : 'مقترحة'}</div><div class="cg">${quick.map(btn).join('')}</div>
+      <button class="link allbtn" data-act="catsall">${F.all ? 'إخفاء الأقسام' : 'كل الفئات حسب القسم'} ${ic('chevron-down', 14)}</button>`;
+    if (F.all) html += GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return '';
+      const open = F.open[g.id] ?? cs.some(c => c.id === F.cat);
+      return `<button class="gh gbtn" data-g="${g.id}">${I(g.icon, 15)} ${g.name} <span class="cnt">${dg(cs.length)}</span><span class="chev ${open ? 'up' : ''}">${ic('chevron-down', 15)}</span></button>${open ? `<div class="cg">${cs.map(btn).join('')}</div>` : ''}`; }).join('');
+  }
+  $('#cg').innerHTML = html;
+}
 function saveForm(more) {
-  const amt = parseFloat(toLatin($('#amt').value));
+  const amt = calc($('#amt').value);
   if (!(amt > 0)) { $('#amt').focus(); toast('أدخل مبلغاً صحيحاً'); return; }
   F.date = $('#date').value || todayStr(); F.time = $('#time').value || F.time || nowTime();
   const rec = {type: F.type, amount: Math.round(amt * 100) / 100, cat: F.cat, note: $('#note').value.trim(), date: F.date, time: F.time};
@@ -522,7 +573,7 @@ function promptSheet(title, label, value, onOk, type = 'text') {
 }
 function catsSheet() {
   sheet(`<div class="sh"><b>إدارة الفئات</b><button class="x" data-act="close">✕</button></div>
-    ${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<div class="gh">${g.icon} ${g.name}</div><div class="card set">${cs.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e">${c.icon}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>` : ''; }).join('')}
+    ${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<div class="gh">${I(g.icon)} ${g.name}</div><div class="card set">${cs.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e">${I(c.icon)}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>` : ''; }).join('')}
     <div class="btns"><button class="btn p" data-act="catnew">+ فئة جديدة</button></div>`);
 }
 function catForm(id) {
@@ -530,8 +581,8 @@ function catForm(id) {
   F = {cid: id, icon: c.icon, color: c.color};
   sheet(`<div class="sh"><b>${id ? 'تعديل الفئة' : 'فئة جديدة'}</b><button class="x" data-act="close">✕</button></div>
     <div class="fld"><input id="cn" type="text" placeholder="اسم الفئة" value="${esc(c.name)}" maxlength="30"></div>
-    <div class="fld"><select id="cgp">${GROUPS.map(g => `<option value="${g.id}" ${g.id === (c.group || 'other') ? 'selected' : ''}>${g.icon} القسم: ${g.name}</option>`).join('')}</select></div>
-    <div class="cg" id="ig" style="grid-template-columns:repeat(7,1fr)">${ICONS.map(i => `<button data-icon="${i}" class="${i === c.icon ? 'on' : ''}"><span class="e">${i}</span></button>`).join('')}</div>
+    <div class="fld"><select id="cgp">${GROUPS.map(g => `<option value="${g.id}" ${g.id === (c.group || 'other') ? 'selected' : ''}>القسم: ${g.name}</option>`).join('')}</select></div>
+    <div class="cg" id="ig" style="grid-template-columns:repeat(7,1fr)">${ICONS.map(i => `<button data-icon="${i}" class="${i === c.icon ? 'on' : ''}"><span class="e">${I(i, 22)}</span></button>`).join('')}</div>
     <div class="colors" id="clg">${PALETTE.map(p => `<i data-color="${p}" style="background:${p}" class="${p === c.color ? 'on' : ''}"></i>`).join('')}</div>
     <div class="fld" style="margin-top:12px"><input id="cb" type="number" inputmode="decimal" placeholder="ميزانية شهرية لهذه الفئة (اختياري)" value="${c.budget || ''}"></div>
     <div class="btns">${id ? '<button class="btn d" data-act="catdel">حذف</button>' : ''}<button class="btn p" data-act="catsave">حفظ</button></div>`);
@@ -552,9 +603,11 @@ const stamp = () => todayStr();
 
 /* ============ الأحداث ============ */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by]'); if (!el) return;
+  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by],[data-k],[data-g]'); if (!el) return;
   const D = el.dataset;
   if (D.tab) { S.tab = D.tab; render(); scrollTo(0, 0); return; }
+  if (D.k) { kp(D.k); return; }
+  if (D.g) { F.open[D.g] = !(F.open[D.g] ?? S.d.cats.some(c => (c.group || 'other') === D.g && c.id === F.cat)); paintCats(); return; }
   if (D.by) { S.rep.by = D.by; render(); return; }
   if (D.mode) { S.rep.mode = D.mode; render(); return; }
   if (D.shift) { S.rep.ref = shift(S.rep.mode, S.rep.ref, +D.shift); render(); return; }
@@ -567,6 +620,7 @@ document.addEventListener('click', e => {
   switch (D.act) {
     case 'close': if (e.target === el || el.classList.contains('x')) closeSheet(); break;
     case 'add': openForm(); break;
+    case 'catsall': F.all = !F.all; paintCats(); break;
     case 'edit': openForm(D.id); break;
     case 'save': saveForm(false); break;
     case 'saveMore': saveForm(true); break;
@@ -621,6 +675,7 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('input', e => {
+  if (e.target.id === 'csearch') { F.q = e.target.value; paintCats(); return; }
   if (e.target.id === 'q') { S.f.q = e.target.value; const p = e.target.selectionStart; render(); const q = $('#q'); q.focus(); q.setSelectionRange(p, p); }
 });
 document.addEventListener('change', e => {
@@ -661,7 +716,7 @@ function runRecurring() {
 function recsSheet() {
   sheet(`<div class="sh"><b>المصاريف المتكررة</b><button class="x" data-act="close">✕</button></div>
     <div class="hint" style="color:var(--mute);font-size:13px;margin-bottom:8px">تُسجَّل تلقائياً في يومها من كل شهر، مثل الإيجار والاشتراكات والأقساط.</div>
-    ${S.d.rec.length ? `<div class="card set">${S.d.rec.map(r => { const c = catOf(r.cat); return `<button class="r" data-act="recedit" data-id="${r.id}"><span class="e">${c.icon}</span><b>${esc(r.note || c.name)}</b><span>${num(r.amount, 0)} · يوم ${dg(r.day)}</span></button>`; }).join('')}</div>` : '<div class="empty"><div class="e">🔁</div>لا توجد بنود متكررة بعد</div>'}
+    ${S.d.rec.length ? `<div class="card set">${S.d.rec.map(r => { const c = catOf(r.cat); return `<button class="r" data-act="recedit" data-id="${r.id}"><span class="e">${I(c.icon)}</span><b>${esc(r.note || c.name)}</b><span>${num(r.amount, 0)} · يوم ${dg(r.day)}</span></button>`; }).join('')}</div>` : '<div class="empty"><div class="e">🔁</div>لا توجد بنود متكررة بعد</div>'}
     <div class="btns"><button class="btn p" data-act="recnew">+ بند متكرر جديد</button></div>`);
 }
 function recForm(id) {
@@ -670,8 +725,8 @@ function recForm(id) {
   sheet(`<div class="sh"><b>${id ? 'تعديل البند' : 'بند متكرر جديد'}</b><button class="x" data-act="close">✕</button></div>
     <div class="fld"><input id="rn" type="text" placeholder="الاسم (مثال: إيجار الشقة)" value="${esc(r.note)}" maxlength="60"></div>
     <div class="amt exp"><input id="ra" inputmode="decimal" placeholder="المبلغ" value="${r.amount}"><span>${esc(S.d.set.cur)}</span></div>
-    <div class="fld"><select id="rc"><optgroup label="مصروفات">${GROUPS.flatMap(g => S.d.cats.filter(c => (c.group || 'other') === g.id)).map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup>
-      <optgroup label="دخل">${INC_CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.icon} ${esc(c.name)}</option>`).join('')}</optgroup></select></div>
+    <div class="fld"><select id="rc"><optgroup label="مصروفات">${GROUPS.flatMap(g => S.d.cats.filter(c => (c.group || 'other') === g.id)).map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup>
+      <optgroup label="دخل">${INC_CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup></select></div>
     <div class="fld"><input id="rd" type="number" min="1" max="28" inputmode="numeric" placeholder="يوم الشهر (من 1 إلى 28)" value="${r.day}"></div>
     <div class="btns">${id ? '<button class="btn d" data-act="recdel">حذف</button>' : ''}<button class="btn p" data-act="recsave">حفظ</button></div>`);
 }
@@ -721,6 +776,7 @@ function demo() {
 }
 
 /* تشغيل */
+document.querySelectorAll('[data-i]').forEach(e => e.innerHTML = ic(e.dataset.i, 24, 1.9));
 load(); applyTheme(); render(); pullSms(); runRecurring();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) runRecurring(); });
 if ('serviceWorker' in navigator && /^https:|localhost|127\.0\.0\.1/.test(location.protocol + location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
