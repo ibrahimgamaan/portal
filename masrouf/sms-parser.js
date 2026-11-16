@@ -54,6 +54,12 @@
     return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
   }
 
+  function parseTime(t, ts) {
+    const m = t.match(/(?:^|[\s:T])(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?|ص|م)?/);
+    if (m) { let h = +m[1]; const mi = +m[2], ap = (m[3] || '').toLowerCase();
+      if (h < 24 && mi < 60) { if (/^p|م/.test(ap) && h < 12) h += 12; if (/^a|ص/.test(ap) && h === 12) h = 0; return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0'); } }
+    const f = new Date(ts || Date.now()); return String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
+  }
   function parseSms(body, ts) {
     const t = norm(body);
     if (!t || SKIP.test(t)) return null;
@@ -74,7 +80,7 @@
     let merchant = '';
     const mm = main.match(/(?:لدى|عند|من\s*متجر|التاجر|\bmerchant\b|\bat\b|\bto\b|\bfrom\b|\bbiller\b|المستفيد|الجهة|الى|إلى|(?<=^|\s)من)\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i);
     if (mm) merchant = mm[1].replace(/[*:]+$/g, '').replace(/^[\s:*-]+|[\s:*-]+$/g, '').slice(0, 40);
-    return {type, amount, merchant, date: parseDate(t, ts), cat: type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main)};
+    return {type, amount, merchant, date: parseDate(t, ts), time: parseTime(t, ts), cat: type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main)};
   }
   const api = {parseSms, guessCat};
   if (typeof module !== 'undefined') module.exports = api; else root.SmsParser = api;
