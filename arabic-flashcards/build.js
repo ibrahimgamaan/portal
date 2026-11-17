@@ -12,9 +12,9 @@ const L=[
 const cols=['#e53935','#f2a900','#f57c00','#2e9e44','#1e88e5','#8e24aa','#d81b60','#00897b'];
 const W=path.resolve('node_modules');
 const css=`
-@font-face{font-family:C;font-weight:800;src:url(file://${W}/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-800-normal.woff2)}
-@font-face{font-family:C;font-weight:900;src:url(file://${W}/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-900-normal.woff2)}
-@font-face{font-family:C;font-weight:700;src:url(file://${W}/@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-700-normal.woff2)}
+@font-face{font-family:C;font-weight:800;src:url(file://${W}/@fontsource/aref-ruqaa/files/aref-ruqaa-arabic-700-normal.woff2)}
+@font-face{font-family:C;font-weight:900;src:url(file://${W}/@fontsource/aref-ruqaa/files/aref-ruqaa-arabic-700-normal.woff2)}
+@font-face{font-family:C;font-weight:700;src:url(file://${W}/@fontsource/aref-ruqaa/files/aref-ruqaa-arabic-700-normal.woff2)}
 @font-face{font-family:S;font-style:italic;src:url(file://${W}/@fontsource/roboto-slab/files/roboto-slab-latin-400-normal.woff2)}
 @page{size:A4;margin:0}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,11 +22,11 @@ html,body{width:210mm}
 body{font-family:C,sans-serif;background:#fff;direction:rtl}
 .page{width:210mm;height:297mm;padding:12mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7mm;page-break-after:always;break-after:page;overflow:hidden}
 .card{border:1mm solid #e9ac90;border-radius:9mm;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9mm}
-.pic{position:absolute;top:6mm;left:6mm;width:27mm;text-align:center}
+.pic{position:absolute;top:6mm;left:6mm;width:30mm;text-align:center}
 .pic img{width:25mm;height:25mm;display:block;margin:0 auto}
-.w{font-weight:800;font-size:17pt;line-height:1.2;margin-top:1.5mm;white-space:nowrap}
-.g{position:absolute;top:0;left:0;right:0;bottom:44mm;top:34mm;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:122pt;line-height:1.6;color:#000}
-.n{font-weight:800;font-size:33pt;line-height:1.1}
+.w{font-weight:800;font-size:30pt;line-height:1.3;margin-top:1.5mm;white-space:nowrap}
+.g{position:absolute;top:0;left:0;right:0;bottom:60mm;top:38mm;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:118pt;line-height:1.6;color:#000}
+.n{font-weight:800;font-size:40pt;line-height:1.1}
 .e{font-family:S,serif;font-style:italic;font-size:19pt;margin-top:1.5mm;direction:ltr;color:#111}
 `;
 function card(c,i){const col=cols[i%cols.length];const w=c[3];
