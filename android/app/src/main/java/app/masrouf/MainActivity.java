@@ -9,6 +9,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.view.View;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Base64;
@@ -32,6 +34,20 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
+        s.setTextZoom(100);
+        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(true);
+        s.setMediaPlaybackRequiresUserGesture(true);
+        wv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        wv.setVerticalScrollBarEnabled(false);
+        wv.setHorizontalScrollBarEnabled(false);
+        wv.setBackgroundColor(0xFFF3F6F6);
+        wv.setLongClickable(false);
+        wv.setOnLongClickListener(v -> true);
+        wv.setHapticFeedbackEnabled(false);
         wv.addJavascriptInterface(new Bridge(), "AndroidBridge");
         wv.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
@@ -92,6 +108,9 @@ public class MainActivity extends Activity {
     }
 
     class Bridge {
+        @JavascriptInterface public void openSettings() {
+            runOnUiThread(() -> startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))));
+        }
         @JavascriptInterface public void haptic(int ms) {
             Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
             if (v != null && v.hasVibrator()) v.vibrate(VibrationEffect.createOneShot(Math.max(5, Math.min(ms, 60)), VibrationEffect.DEFAULT_AMPLITUDE));

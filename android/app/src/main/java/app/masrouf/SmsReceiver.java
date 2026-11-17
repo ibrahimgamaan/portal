@@ -29,7 +29,7 @@ public class SmsReceiver extends BroadcastReceiver {
         if (!FIN.matcher(text).find()) return;
         try {
             push(c, parts[0].getOriginatingAddress(), text, parts[0].getTimestampMillis());
-            notifyUser(c);
+            notifyUser(c, SmsPreview.of(text));
         } catch (Exception ignored) {}
     }
 
@@ -55,12 +55,14 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    static void notifyUser(Context c) {
+    static void notifyUser(Context c, SmsPreview p) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.createNotificationChannel(new NotificationChannel("tx", "عمليات جديدة", NotificationManager.IMPORTANCE_DEFAULT));
-        PendingIntent pi = PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        nm.createNotificationChannel(new NotificationChannel("tx", "عمليات جديدة", NotificationManager.IMPORTANCE_HIGH));
+        PendingIntent pi = PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        String title = p.amount != null ? "عملية جديدة: " + p.amount + " ر.س" : "عملية جديدة من رسالة البنك";
+        String text = (p.merchant != null ? p.merchant + " — " : "") + "اضغط للمراجعة والتأكيد";
         Notification n = new Notification.Builder(c, "tx").setSmallIcon(android.R.drawable.ic_menu_agenda)
-            .setContentTitle("مصروفي").setContentText("وصلت عملية جديدة من رسالة البنك، اضغط للمراجعة")
+            .setContentTitle(title).setContentText(text).setStyle(new Notification.BigTextStyle().bigText(text))
             .setContentIntent(pi).setAutoCancel(true).build();
         nm.notify((int) (System.currentTimeMillis() % 100000), n);
     }

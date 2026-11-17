@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>مصروفي</title>
 <meta name="description" content="تتبع المصاريف اليومية مع تقارير يومية وشهرية وسنوية احترافية">
 <meta name="theme-color" content="#0f766e">
@@ -20,6 +20,10 @@
   --bg:#0b1413;--card:#13201f;--ink:#e8f1f0;--mute:#9db4b2;--line:#233a39;--bd:#1f3433;--pri:#2dd4bf;--pri2:#14b8a6;--pri-soft:#12302d;--exp:#fb7185;--inc:#4ade80;--shadow:0 6px 20px rgba(0,0,0,.35)}}
 :root[data-theme=dark]{--bg:#0b1413;--card:#13201f;--ink:#e8f1f0;--mute:#9db4b2;--line:#233a39;--bd:#1f3433;--pri:#2dd4bf;--pri2:#14b8a6;--pri-soft:#12302d;--exp:#fb7185;--inc:#4ade80;--shadow:0 6px 20px rgba(0,0,0,.35)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;touch-action:manipulation}
+body{overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select{-webkit-user-select:text;user-select:text}
+img,svg{-webkit-user-drag:none}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
@@ -92,8 +96,8 @@ small{font-weight:500}
 .bars .c u{font-size:10px;color:var(--mute);text-decoration:none;margin-top:4px;height:14px;white-space:nowrap}
 .bars .c s{position:absolute;inset-inline:-4px;text-align:center;font-size:9.5px;color:var(--mute);text-decoration:none;white-space:nowrap}
 .tipline{text-align:center;color:var(--mute);font-size:12.5px;margin-top:8px;min-height:20px}
-.fab{position:fixed;bottom:calc(30px + env(safe-area-inset-bottom));inset-inline-start:50%;transform:translateX(50%);width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-size:34px;line-height:1;box-shadow:0 8px 22px rgba(15,118,110,.45);z-index:30;display:grid;place-items:center;border:4px solid var(--bg)}
-.fab:active{transform:translateX(50%) scale(.94)}
+.fab{position:fixed;bottom:calc(30px + env(safe-area-inset-bottom));left:0;right:0;margin-inline:auto;transform:none;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-size:34px;line-height:1;box-shadow:0 8px 22px rgba(15,118,110,.45);z-index:30;display:grid;place-items:center;border:4px solid var(--bg)}
+.fab:active{filter:brightness(.92)}
 .tabs{position:fixed;bottom:0;inset-inline:0;z-index:25;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
 .tabs .in{display:flex;width:100%;max-width:720px}
 .tabs button{flex:1;display:grid;justify-items:center;gap:1px;padding:6px 0;color:var(--mute);font-size:11.5px;font-weight:500}
@@ -160,7 +164,7 @@ input:focus,select:focus{border-color:var(--pri)}
 .view.enter>*{animation:rise .38s cubic-bezier(.2,.8,.2,1) both}
 .view.enter>*:nth-child(2){animation-delay:.05s}.view.enter>*:nth-child(3){animation-delay:.1s}.view.enter>*:nth-child(4){animation-delay:.15s}.view.enter>*:nth-child(n+5){animation-delay:.2s}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
-.tx{position:relative;touch-action:pan-y;transition:transform .2s,background .15s}.tx.sw-d{background:#fee2e2!important}.tx.sw-e{background:#dcfce7!important}
+.tx{position:relative;touch-action:pan-y;transition:transform .2s,background .15s}.tx.sw-d{box-shadow:inset 0 0 0 2px #f87171}.tx.sw-e{box-shadow:inset 0 0 0 2px #4ade80}
 .ob{text-align:center;padding:10px 6px 4px}.ob .obi{width:92px;height:92px;border-radius:28px;margin:6px auto 14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--pri2),var(--pri));box-shadow:0 10px 26px rgba(15,118,110,.35)}
 .ob h2{margin:0 0 8px;font-size:22px}.ob p{margin:0 auto;max-width:320px;color:var(--mute);line-height:1.8}
 .dots{display:flex;gap:6px;justify-content:center;margin:18px 0}.dots i{width:8px;height:8px;border-radius:99px;background:var(--line)}.dots i.on{width:22px;background:var(--pri)}
@@ -420,7 +424,7 @@ function budgetCheck() {
 }
 function viewHome() {
   const now = new Date(), tx = S.d.tx, set = S.d.set;
-  if (!tx.length && S.d.pending.length) return pendingCard();
+  if (!tx.length && S.d.pending.length) return smsBanner() + pendingCard();
   if (!tx.length) return `<div class="card empty"><div class="e">👋</div><h3>أهلاً بك في مصروفي</h3>
     <p>اضغط على زر <b>+</b> وسجّل أول مصروف لك. لن يأخذ منك أكثر من ثوانٍ.</p>
     <div class="btns"><button class="btn p" data-act="add">تسجيل أول مصروف</button><button class="btn" data-act="demo">تجربة ببيانات وهمية</button></div></div>`;
@@ -437,7 +441,7 @@ function viewHome() {
   } else budgetHtml = `<div class="hint">المتوسط اليومي ${num(spent / dom, 0)} ${esc(set.cur)} · التوقع لنهاية الشهر ${num(proj, 0)}</div>`;
   const cats = groupByCat(mo).slice(0, 4), tot = spent || 1;
   const recent = [...tx].sort(tcmp).slice(0, 6);
-  return `${pendingCard()}<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
+  return `${smsBanner()}${pendingCard()}<section class="hero"><div class="lbl">مصروفات ${monthLabel(now)}</div>
     <div class="big"><span class="m" data-v="${spent}">${num(spent)}</span> <small>${esc(set.cur)}</small></div>${budgetHtml}
     <div class="row" style="margin-top:12px"><div class="mini">اليوم<b>${num(today, 0)}</b></div><div class="mini">الدخل<b>${num(inc, 0)}</b></div><div class="mini">الصافي<b>${num(inc - spent, 0)}</b></div></div></section>
     ${homeInsights(tx, now)}
@@ -509,7 +513,7 @@ function viewMore() {
     ${row('arrow-left-right', 'العملة', esc(set.cur), 'currency')}
     ${row('hash', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
     ${row('moon-star', 'المظهر', themes[set.theme], 'theme')}
-    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('mail-check', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('share-2', 'من تطبيق الرسائل: شارك الرسالة إلى مصروفي', '', 'sharehelp')) : ''}
+    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('mail-check', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('share-2', 'هذه النسخة لا تقرأ الرسائل تلقائياً، اضغط للتفاصيل', '', 'sharehelp')) : ''}
     ${row('zap', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
     ${row('clipboard-list', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
     ${row('repeat', 'المصاريف المتكررة', dg(S.d.rec.length) + ' بند', 'recs')}
@@ -530,6 +534,7 @@ function countUp(el) {
   requestAnimationFrame(step);
 }
 let OB = 0;
+function askSmsOnce() { if (window.AndroidBridge && AndroidBridge.smsSupported && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) { S.smsAsk = true; AndroidBridge.requestSms(); } }
 function onboard() {
   const slides = [['plus', 'سجّل مصروفك في ثوانٍ', 'اضغط + واكتب المبلغ على لوحة الأرقام، واختر الفئة، وانتهى. تستطيع الجمع والطرح مباشرة مثل 12+5.'],
     ['chart-column', 'تقارير تفهمك', 'تقارير يومية وأسبوعية وشهرية وسنوية بالرسوم، وقارن صرفك بالفترة السابقة وتابع ميزانيتك.'],
@@ -725,8 +730,8 @@ document.addEventListener('click', e => {
   switch (D.act) {
     case 'close': if (e.target === el || el.classList.contains('x')) closeSheet(); break;
     case 'add': openForm(); break;
-    case 'onext': if (OB < 2) { OB++; onboard(); } else { set.onboarded = true; save(); closeSheet(); } break;
-    case 'oskip': set.onboarded = true; save(); closeSheet(); break;
+    case 'onext': if (OB < 2) { OB++; onboard(); } else { set.onboarded = true; save(); closeSheet(); askSmsOnce(); } break;
+    case 'oskip': set.onboarded = true; save(); closeSheet(); askSmsOnce(); break;
     case 'catsall': F.all = !F.all; paintCats(); break;
     case 'edit': openForm(D.id); break;
     case 'save': saveForm(false); break;
@@ -759,7 +764,8 @@ document.addEventListener('click', e => {
         S.d.tx.forEach(t => { if (t.cat === F.cid) t.cat = other.id; });
         S.d.cats = S.d.cats.filter(c => c.id !== F.cid); save(); catsSheet(); render(); }
       break; }
-    case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else AndroidBridge.requestSms(); break;
+    case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else { S.smsAsk = true; AndroidBridge.requestSms(); } break;
+    case 'opensettings': AndroidBridge.openSettings(); break;
     case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const n = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(n ? 'أُضيفت للمراجعة في الرئيسية' : 'لم أتعرف على عملية مالية في هذه الرسالة'); S.tab = 'home'; render(); }); break;
     case 'autotoggle': set.auto = !set.auto; save(); render(); toast(set.auto ? 'الرسائل المعروفة الفئة تُسجَّل مباشرة، وغير المعروفة تنتظر مراجعتك' : 'كل الرسائل تنتظر مراجعتك'); break;
     case 'recs': recsSheet(); break;
@@ -773,7 +779,7 @@ document.addEventListener('click', e => {
         S.d.rec.push({id: uid(), last: day <= n.getDate() ? `${n.getFullYear()}-${pad(n.getMonth() + 1)}` : `${pm.getFullYear()}-${pad(pm.getMonth() + 1)}`, ...rec}); }
       save(); runRecurring(); recsSheet(); render(); break; }
     case 'recdel': S.d.rec = S.d.rec.filter(r => r.id !== F.rid); save(); recsSheet(); render(); break;
-    case 'sharehelp': toast('افتح الرسالة في تطبيق الرسائل ثم اضغط مشاركة واختر مصروفي'); break;
+    case 'sharehelp': sheet(`<div class="sh"><b>القراءة التلقائية للرسائل</b><button class="x" data-act="close">✕</button></div><div class="card" style="line-height:2">النسخة المثبّتة عندك <b>لا تملك صلاحية قراءة الرسائل</b>، لذلك لا تسجّل شيئاً من تلقاء نفسها.<br>لتفعيل القراءة التلقائية ثبّت <b>النسخة الكاملة</b> (ملف <b>masrouf.apk</b> من الرابط الأساسي) فوق هذه النسخة.<br>وإلى ذلك الحين: افتح الرسالة ثم <b>مشاركة</b> واختر <b>مصروفي</b>.</div>`); break;
     case 'pok': confirmPending(D.id); break;
     case 'pno': S.d.pending = S.d.pending.filter(x => x.id !== D.id); save(); render(); break;
     case 'pall': [...S.d.pending].forEach(x => confirmPending(x.id, true)); toast('تم تأكيد كل العمليات'); break;
@@ -804,8 +810,15 @@ document.addEventListener('change', e => {
 let SW = null;
 document.addEventListener('touchstart', e => { const r = e.target.closest('.tx[data-id]'); if (!r || r.closest('.pend')) { SW = null; return; } SW = {r, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, on: false}; }, {passive: true});
 document.addEventListener('touchmove', e => { if (!SW) return; const dx = e.touches[0].clientX - SW.x, dy = e.touches[0].clientY - SW.y;
-  if (!SW.on && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.6) SW.on = true;
+  if (!SW.on && Math.abs(dy) > 10 && Math.abs(dy) >= Math.abs(dx) * .6) { swReset(); return; }
+  if (!SW.on && Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 2.2) SW.on = true;
   if (SW.on) { SW.dx = Math.max(-130, Math.min(130, dx)); SW.r.style.transform = `translateX(${SW.dx}px)`; SW.r.classList.toggle('sw-d', SW.dx < -60); SW.r.classList.toggle('sw-e', SW.dx > 60); } }, {passive: true});
+const swReset = () => { if (SW) { SW.r.style.transform = ''; SW.r.classList.remove('sw-d', 'sw-e'); SW = null; } document.querySelectorAll('.tx.sw-d,.tx.sw-e').forEach(r => { r.style.transform = ''; r.classList.remove('sw-d', 'sw-e'); }); };
+document.addEventListener('touchcancel', swReset, {passive: true});
+window.addEventListener('scroll', () => { if (SW && SW.on) swReset(); }, {passive: true});
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive: false});
+document.addEventListener('contextmenu', e => { if (!e.target.closest('input,textarea')) e.preventDefault(); });
 document.addEventListener('touchend', () => { if (!SW) return; const {r, dx, on} = SW; SW = null; if (!on) return; S.swipeT = Date.now();
   r.style.transform = ''; r.classList.remove('sw-d', 'sw-e'); if (dx < -90) { haptic(20); delTx(r.dataset.id); } else if (dx > 90) { haptic(12); openForm(r.dataset.id); } });
 document.addEventListener('keydown', e => {
@@ -873,7 +886,18 @@ function pullSms() {
   if (!window.AndroidBridge) return;
   try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast(S.auto ? 'سُجّلت عملية من رسالة البنك 📩' : 'وصلت عملية جديدة للمراجعة 📩'); S.auto = 0; setTimeout(budgetCheck, 2400); } } catch (e) {}
 }
-window.smsStatusChanged = () => { render(); pullSms(); };
+window.smsStatusChanged = () => { render(); pullSms(); if (S.smsAsk) { S.smsAsk = false; if (window.AndroidBridge && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) smsHelp(); else if (window.AndroidBridge && AndroidBridge.hasSms()) toast('تم تفعيل قراءة الرسائل ✓'); } };
+function smsHelp() {
+  sheet(`<div class="sh"><b>تفعيل قراءة الرسائل</b><button class="x" data-act="close">✕</button></div>
+    <div class="card" style="line-height:2"><b>إن لم تظهر نافذة الإذن أو رُفض، فاتّبع الخطوات:</b><br>
+    ١. اضغط الزر أدناه لفتح إعدادات التطبيق.<br>٢. اضغط على النقاط الثلاث في أعلى الشاشة واختر <b>السماح بالإعدادات المقيّدة</b>.<br>
+    ٣. ادخل إلى <b>الأذونات</b> ثم <b>الرسائل SMS</b> واختر <b>السماح</b>.<br>٤. عُد إلى مصروفي.</div>
+    <div class="btns"><button class="btn p" data-act="opensettings">فتح إعدادات التطبيق</button></div>`);
+}
+function smsBanner() {
+  if (!window.AndroidBridge || !AndroidBridge.smsSupported || !AndroidBridge.smsSupported() || AndroidBridge.hasSms()) return '';
+  return `<section class="card pend"><h3>${ic('mail-check', 18)} فعّل قراءة رسائل البنك</h3><div class="hint" style="margin-bottom:10px">ليسجّل التطبيق عملياتك تلقائياً بمجرد وصول رسالة الخصم، ثم تراجعها وتؤكدها.</div><div class="btns"><button class="btn p" data-act="smsperm">تفعيل الآن</button></div></section>`;
+}
 if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', pullSms); }
 
 /* بيانات تجريبية */
