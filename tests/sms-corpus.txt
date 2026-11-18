@@ -1,0 +1,175 @@
+#expect txn
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 21.00
+At: Shawerma House
+In SAUDI ARABIA
+Remaining limit SAR: 14,829.18
+On: 2026-11-13 17:39:35
+#end
+#expect txn
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 7.00
+At: SHABYAT ALMUALEM RESTURAN
+In SAUDI ARABIA
+Remaining limit SAR: 14,425.21
+On: 2026-11-14 11:32:02
+#end
+#expect txn
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 10.60
+At: FOLWAT ALBAHRAIN CO
+In SAUDI ARABIA
+Remaining limit SAR: 14,414.61
+On: 2026-11-14 18:35:13
+#end
+#expect txn
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 7.00
+At: Dawar Alsaada
+In SAUDI ARABIA
+Remaining limit SAR: 14,385.53
+On: 2026-11-16 11:06:13
+#end
+#expect txn
+شراء عبر نقاط البيع
+مبلغ: SAR 45.50
+لدى: STARBUCKS
+بطاقة: مدى 1234
+في 15/11/2026 10:22
+الرصيد: 3,200.00 SAR
+#end
+#expect txn
+عملية شراء بمبلغ 120.00 ريال لدى بنده العليا بتاريخ 2026-11-14 الرصيد 5000 ريال
+#end
+#expect txn
+سحب نقدي
+مبلغ:٣٠٠٫٠٠ SAR
+من: ATM الراجحي
+الرصيد: 1,000 SAR
+#end
+#expect txn
+ATM Withdrawal
+By: XX7483;Mada
+Amount: SAR 500.00
+At: ALRAJHI ATM 1234
+On: 2026-11-15 09:10:00
+#end
+#expect txn
+Online Purchase
+By: XX7483;Visa Credit
+Amount: SAR 59.00
+At: NETFLIX.COM
+On: 2026-11-15 20:00:00
+#end
+#expect txn
+حوالة صادرة بمبلغ 1,500.00 SAR الى أحمد محمد
+#end
+#expect txn
+Outgoing Transfer
+Amount: SAR 1,200.00
+To: Ahmed Ali
+On: 2026-11-15 12:00:00
+#end
+#expect txn
+تم إيداع راتب بمبلغ SAR 9,000.00 في حسابك
+#end
+#expect txn
+Incoming Transfer
+Amount: SAR 3,000.00
+From: Mohammed
+On: 2026-11-15 12:00:00
+#end
+#expect txn
+Refund
+Amount: SAR 35.00
+From: AMAZON.SA
+On: 2026-11-15 12:00:00
+#end
+#expect txn
+Purchase of SAR 89.90 at AMAZON.SA on 13/11/26 Balance SAR 800
+#end
+#expect txn
+Credit Card Purchase
+Amount: SAR 88.00
+At: IKEA
+On: 2026-11-15
+#end
+#expect txn
+Bill Payment SADAD
+Amount: SAR 230.00
+Biller: Saudi Electricity
+On: 2026-11-15
+#end
+#expect txn
+خصم فاتورة STC بمبلغ 199 ر.س
+#end
+#expect txn
+تم خصم 45 ريال من حسابك رسوم بطاقة
+#end
+#expect txn
+تم تحويل مبلغ 500 ريال إلى حسابك
+#end
+#expect txn
+POS Purchase
+Amount: SAR 150.00
+At: Fitness Time
+On: 2026-11-15
+#end
+#expect ignore
+رمز التحقق 123456 لعملية شراء بمبلغ 200 SAR
+#end
+#expect ignore
+Your OTP is 4455 for purchase of SAR 120.00 at AMAZON. Do not share it.
+#end
+#expect ignore
+عرض خاص من البنك! خصم 20% على المطاعم
+#end
+#expect ignore
+استمتع بخصم 30% على جميع المشتريات ببطاقتك مدى حتى نهاية الشهر
+#end
+#expect ignore
+احصل على تمويل شخصي حتى 100,000 ريال بدون رسوم، قدّم الآن https://bank.example/apply
+#end
+#expect ignore
+سجّل الآن واربح جوائز بقيمة 10,000 ريال في السحب الكبير
+#end
+#expect ignore
+تهانينا! فزت بقسيمة شراء بقيمة 500 ريال، للمزيد اضغط الرابط
+#end
+#expect ignore
+رصيدك الحالي 5,000.00 ريال
+#end
+#expect ignore
+Your balance is SAR 5,000.00 as of 15/11/2026
+#end
+#expect ignore
+تم تحديث بياناتك بنجاح
+#end
+#expect ignore
+فاتورتك المستحقة 230 ريال، سدد الآن قبل نهاية الشهر
+#end
+#expect ignore
+تم رفض عملية شراء بمبلغ 50 SAR بسبب عدم كفاية الرصيد
+#end
+#expect ignore
+Transaction declined: purchase of SAR 75.00 at NOON. Insufficient funds.
+#end
+#expect ignore
+Dear customer, limited offer: 15% discount at selected restaurants. Download our app
+#end
+#expect ignore
+مرحباً بك في خدمة العملاء، اتصل على 920000000
+#end
+#expect ignore
+Your statement is ready. Please log in to view it.
+#end
+#expect maybe
+مبلغ 500 ريال متاح لك في حسابك
+#end
+#expect maybe
+Amount: SAR 300.00 pending approval
+#end

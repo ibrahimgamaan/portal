@@ -18,13 +18,18 @@ final class SmsPreview {
 
     private SmsPreview(String a, String m) { amount = a; merchant = m; }
 
-    static SmsPreview of(String body) {
+    /** النص بعد توحيد الأرقام وإزالة سطر الرصيد (مطابق لـ norm و BAL في sms-parser.js) */
+    static String mainText(String body) {
         String t = body == null ? "" : body;
         StringBuilder n = new StringBuilder();
-        for (char c : t.toCharArray()) n.append(c >= '٠' && c <= '٩' ? (char) ('0' + (c - '٠')) : c == '٫' ? '.' : c == '٬' ? ',' : c);
-        String main = BAL.matcher(n).replaceAll(" ");
+        for (char c : t.toCharArray()) { if (c == '\u200f' || c == '\u200e') continue; n.append(c >= '٠' && c <= '٩' ? (char) ('0' + (c - '٠')) : c == '٫' ? '.' : c == '٬' ? ',' : c); }
+        return BAL.matcher(n).replaceAll(" ");
+    }
+
+    static SmsPreview of(String body) {
+        String main = mainText(body);
         String amount = null;
-        for (Pattern p : AMT) { Matcher m = p.matcher(main); if (m.find()) { amount = m.group(1).replace(",", ""); break; } }
+        for (Pattern p : AMT) { Matcher m = p.matcher(main); if (m.find()) { String v = m.group(1).replace(",", ""); if (Double.parseDouble(v) > 0) { amount = v; break; } } }
         String merchant = null;
         Matcher mm = MER.matcher(main);
         if (mm.find()) { merchant = mm.group(1).trim(); if (merchant.length() > 40) merchant = merchant.substring(0, 40); }

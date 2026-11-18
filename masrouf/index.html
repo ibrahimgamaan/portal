@@ -139,9 +139,9 @@ input:focus,select:focus{border-color:var(--pri)}
 .pend{border:2px solid var(--pri2);background:var(--pri-soft)}
 .pend .tx{box-shadow:none;margin-bottom:8px;display:block}
 .pend .tx .top2{display:flex;align-items:center;gap:12px}
-.pend .pb{display:flex;gap:6px;margin-top:10px}
-.pend .pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
-.pend .pb .ok{background:var(--pri);color:#fff}.pend .pb .no{color:var(--exp)}
+.pb{display:flex;gap:6px;margin-top:10px}
+.pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
+.pb .ok{background:var(--pri);color:#fff}.pb .no{color:var(--exp)}
 .pend small.src{color:var(--mute);font-size:11.5px;display:block;margin-top:2px}
 .gh{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute);font-weight:600;margin:12px 2px 2px}
 .sub{padding-inline-start:18px;color:var(--mute);font-size:12.5px;display:flex;justify-content:space-between}
@@ -169,6 +169,14 @@ input:focus,select:focus{border-color:var(--pri)}
 .ob h2{margin:0 0 8px;font-size:22px}.ob p{margin:0 auto;max-width:320px;color:var(--mute);line-height:1.8}
 .dots{display:flex;gap:6px;justify-content:center;margin:18px 0}.dots i{width:8px;height:8px;border-radius:99px;background:var(--line)}.dots i.on{width:22px;background:var(--pri)}
 .printhead .ph{display:flex;gap:12px;align-items:center}
+.hr{display:flex;align-items:center;gap:12px}
+.ibtn{position:relative;width:42px;height:42px;border-radius:13px;background:var(--card);color:var(--pri);box-shadow:var(--shadow);display:grid;place-items:center;border:1px solid var(--bd)}
+.ibtn b{position:absolute;top:-5px;inset-inline-end:-5px;min-width:19px;height:19px;border-radius:99px;background:var(--exp);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+.snip{font-size:12.5px;color:var(--mute);line-height:1.6;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;direction:auto;unicode-bidi:plaintext;text-align:start}
+.mrow{background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;border:1px solid var(--bd)}
+.mrow .top2{display:flex;align-items:center;gap:10px}.mrow .top2 b{flex:1}.mrow .top2 em{font-style:normal;font-weight:700}
+details.card summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.card summary::-webkit-details-marker{display:none}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -182,7 +190,7 @@ input:focus,select:focus{border-color:var(--pri)}
 </head>
 <body>
 <div id="app">
-  <header class="top"><div><h1><svg width="32" height="32" viewBox="0 0 512 512"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b5f59"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g transform="translate(256 256) rotate(-90)" fill="none" stroke-width="54"><circle r="118" stroke="#fff" stroke-opacity=".22"/><circle r="118" stroke="#fff" stroke-linecap="round" stroke-dasharray="430 800"/><circle r="118" stroke="#fcd34d" stroke-linecap="round" stroke-dasharray="90 800" stroke-dashoffset="-470"/></g><circle cx="256" cy="256" r="36" fill="#fff"/><circle cx="256" cy="256" r="16" fill="#0f766e"/></svg>مصروفي</h1></div><div class="sub" id="topSub"></div></header>
+  <header class="top"><div><h1><svg width="32" height="32" viewBox="0 0 512 512"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b5f59"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g transform="translate(256 256) rotate(-90)" fill="none" stroke-width="54"><circle r="118" stroke="#fff" stroke-opacity=".22"/><circle r="118" stroke="#fff" stroke-linecap="round" stroke-dasharray="430 800"/><circle r="118" stroke="#fcd34d" stroke-linecap="round" stroke-dasharray="90 800" stroke-dashoffset="-470"/></g><circle cx="256" cy="256" r="36" fill="#fff"/><circle cx="256" cy="256" r="16" fill="#0f766e"/></svg>مصروفي</h1></div><div class="hr"><button class="ibtn" id="inboxBtn" data-tab="inbox" aria-label="الرسائل والمراجعة"><span data-i="mail"></span><b id="inboxBadge" hidden></b></button><div class="sub" id="topSub"></div></div></header>
   <main id="view" class="view"></main>
 </div>
 <button class="fab" data-act="add" aria-label="إضافة عملية">+</button>
@@ -273,9 +281,10 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5'], rec: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5'], rec: [], maybe: [], ignored: []
 });
 function migrate() {
+  S.d.maybe = S.d.maybe || []; S.d.ignored = S.d.ignored || [];
   S.d.migr = S.d.migr || []; S.d.rec = S.d.rec || []; S.d.pending = S.d.pending || []; S.d.merchants = S.d.merchants || {};
   if (!S.d.migr.includes('v5') && S.d.migr.includes('v4')) {
     S.d.cats.forEach(c => { const d = DEF_CATS.find(x => x.id === c.id); if (d && !ICON_SVG[c.icon]) c.icon = d.icon; });
@@ -393,14 +402,14 @@ const pctBadge = (cur, prev) => {
 };
 
 /* ============ الشاشات ============ */
-function pendingCard() {
-  const p = S.d.pending; if (!p.length) return '';
-  return `<section class="card pend"><h3>📩 بانتظار المراجعة (${dg(p.length)})</h3>${p.map(x => { const c = catOf(x.cat);
+function pendingCard(all) {
+  const p = all ? S.d.pending : S.d.pending.slice(0, 3); if (!S.d.pending.length) return '';
+  return `<section class="card pend"><h3><span>${ic('mail-check', 18)} بانتظار المراجعة (${dg(S.d.pending.length)})</span>${all ? '' : '<a data-tab="inbox">فتح الرسائل</a>'}</h3>${p.map(x => { const c = catOf(x.cat);
     return `<div class="tx"><div class="top2"><span class="ic" style="background:${c.color}22;color:${c.color}">${I(c.icon)}</span>
     <span class="t"><b>${esc(x.merchant || c.name)}</b><span>${esc(c.name)} · ${dayLabel(x.date)}${x.time ? ' · ' + fmtTime(x.time) : ''}</span></span>
     <span class="a ${x.type}">${sign(x.type, x.amount)} <small>${esc(S.d.set.cur)}</small></span></div>
-    <div class="pb"><button class="ok" data-act="pok" data-id="${x.id}">تأكيد</button><button data-act="pedit" data-id="${x.id}">تعديل</button><button class="no" data-act="pno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}
-    ${p.length > 1 ? '<button class="link" data-act="pall" style="margin-top:2px">تأكيد الكل</button>' : ''}</section>`;
+    ${all && x.body ? `<div class="snip">${esc(String(x.body).replace(/\s+/g, ' ').slice(0, 140))}</div>` : ''}<div class="pb"><button class="ok" data-act="pok" data-id="${x.id}">تأكيد</button><button data-act="pedit" data-id="${x.id}">تعديل</button><button class="no" data-act="pno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}
+    ${S.d.pending.length > 1 ? '<button class="link" data-act="pall" style="margin-top:2px">تأكيد الكل</button>' : ''}${!all && S.d.pending.length > 3 ? `<a class="link" data-tab="inbox" style="display:block;margin-top:8px">عرض الباقي (${dg(S.d.pending.length - 3)})</a>` : ''}</section>`;
 }
 function homeInsights(tx, now) {
   const days = [], vals = [], lab = [], tips = [];
@@ -421,6 +430,19 @@ function budgetCheck() {
   set.al = set.al || {};
   if (p >= 100 && set.al.b100 !== key) { set.al.b100 = key; set.al.b80 = key; save(); toast('⚠️ تجاوزت ميزانية هذا الشهر'); }
   else if (p >= 80 && set.al.b80 !== key) { set.al.b80 = key; save(); toast('تنبيه: صرفت ' + dg(Math.round(p)) + '% من ميزانية الشهر'); }
+}
+function viewInbox() {
+  const P = S.d.pending, M = S.d.maybe, G = S.d.ignored, sms = S.d.tx.filter(t => t.sms || t.auto).sort(tcmp).slice(0, 15);
+  const snip = b => `<div class="snip">${esc(String(b || '').replace(/\s+/g, ' ').slice(0, 160))}</div>`;
+  let h = `<div class="hint" style="color:var(--mute);font-size:13px;line-height:1.8">هنا تجد كل ما وصل من رسائل البنك: العمليات التي تنتظر تأكيدك، والرسائل التي لم أستطع الجزم بها، وما تجاهلته لأنه دعائي أو معلومات.</div>`;
+  h += P.length ? pendingCard(true) : `<section class="card"><div class="empty" style="padding:18px 8px"><div style="color:var(--pri)">${ic('check-check', 40, 1.6)}</div><h3>لا توجد عمليات بانتظار المراجعة</h3><p style="margin:0">عند وصول رسالة خصم من البنك تظهر هنا.</p></div></section>`;
+  if (M.length) h += `<section class="card"><h3><span>${ic('mail-warning', 18)} رسائل غير مؤكدة (${dg(M.length)})</span></h3><div class="hint" style="margin-bottom:10px">قد تكون عملية وقد لا تكون، راجعها بنفسك.</div>${M.map(x => {
+    const c = catOf(x.cat || 'other'); return `<div class="mrow"><div class="top2"><span class="ic" style="background:${c.color}22;color:${c.color};width:38px;height:38px;border-radius:12px;display:grid;place-items:center">${I(c.icon)}</span><b>${esc(x.merchant || 'رسالة من ' + (x.sender || 'البنك'))}</b>${x.amount ? `<em>${num(x.amount)} <small>${esc(S.d.set.cur)}</small></em>` : ''}</div>${snip(x.body)}
+      <div class="pb"><button class="ok" data-act="mrec" data-id="${x.id}">سجّلها</button><button class="no" data-act="mno" data-id="${x.id}">تجاهل</button></div></div>`; }).join('')}</section>`;
+  if (G.length) h += `<details class="card"><summary><span>${ic('eye-off', 18)} رسائل تم تجاهلها (${dg(G.length)})</span>${ic('chevron-down', 16)}</summary><div class="hint" style="margin:8px 0 10px">دعائية أو معلومات أو رمز تحقق أو عملية مرفوضة. إن كانت عملية فعلاً اضغط "هذه عملية".</div>${G.map(x => `<div class="mrow"><div class="top2"><b>${esc(x.sender || 'رسالة')}</b><span class="hint">${esc(new Date(x.ts).toLocaleDateString('en-GB'))}</span></div>${snip(x.body)}
+      <div class="pb"><button data-act="grec" data-id="${x.id}">هذه عملية</button><button class="no" data-act="mno" data-id="${x.id}">حذف</button></div></div>`).join('')}<button class="link" data-act="gclear">مسح القائمة</button></details>`;
+  if (sms.length) h += `<section><div class="day"><span>سُجّلت من الرسائل مؤخراً</span></div>${sms.map(txRow).join('')}</section>`;
+  return h;
 }
 function viewHome() {
   const now = new Date(), tx = S.d.tx, set = S.d.set;
@@ -515,6 +537,7 @@ function viewMore() {
     ${row('moon-star', 'المظهر', themes[set.theme], 'theme')}
     ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('mail-check', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('share-2', 'هذه النسخة لا تقرأ الرسائل تلقائياً، اضغط للتفاصيل', '', 'sharehelp')) : ''}
     ${row('zap', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
+    ${row('inbox', 'الرسائل والمراجعة', S.d.pending.length ? dg(S.d.pending.length) + ' بانتظارك' : '', 'goinbox')}
     ${row('clipboard-list', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
     ${row('repeat', 'المصاريف المتكررة', dg(S.d.rec.length) + ' بند', 'recs')}
     ${row('tags', 'إدارة الفئات', dg(S.d.cats.length) + ' فئة', 'cats')}</section>
@@ -546,10 +569,11 @@ function onboard() {
 }
 function render() {
   document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
-  const v = $('#view'); v.innerHTML = {home: viewHome, log: viewLog, rep: viewRep, more: viewMore}[S.tab]();
+  const v = $('#view'); v.innerHTML = {home: viewHome, log: viewLog, rep: viewRep, more: viewMore, inbox: viewInbox}[S.tab]();
   v.classList.toggle('enter', !!S.enter);
   if (S.enter) { v.querySelectorAll('[data-v]').forEach(countUp); S.enter = false; }
-  $('#topSub').textContent = { home: dayLabel(todayStr()), log: 'سجل العمليات', rep: 'التقارير', more: 'الإعدادات' }[S.tab];
+  { const nb = $('#inboxBadge'), n = S.d.pending.length + S.d.maybe.length; nb.hidden = !n; nb.textContent = dg(n > 9 ? '9+' : n); $('#inboxBtn').style.outline = S.tab === 'inbox' ? '2px solid var(--pri)' : ''; }
+  $('#topSub').textContent = { home: dayLabel(todayStr()), log: 'سجل العمليات', rep: 'التقارير', more: 'الإعدادات', inbox: 'الرسائل والمراجعة' }[S.tab];
 }
 
 /* ============ النوافذ ============ */
@@ -633,7 +657,7 @@ function saveForm(more) {
   F.date = $('#date').value || todayStr(); F.time = $('#time').value || F.time || nowTime();
   const rec = {type: F.type, amount: Math.round(amt * 100) / 100, cat: F.cat, note: $('#note').value.trim(), date: F.date, time: F.time};
   if (F.id) Object.assign(S.d.tx.find(x => x.id === F.id), rec); else S.d.tx.push({id: uid(), ts: Date.now(), ...rec});
-  if (F.pid) { S.d.pending = S.d.pending.filter(x => x.id !== F.pid); learn(F.merchant, rec.cat); }
+  if (F.pid) { S.d.pending = S.d.pending.filter(x => x.id !== F.pid); S.d.maybe = S.d.maybe.filter(x => x.id !== F.pid); S.d.ignored = S.d.ignored.filter(x => x.id !== F.pid); learn(F.merchant, rec.cat); S.d.tx[S.d.tx.length - 1].sms = true; }
   save(); render(); haptic(18);
   if (more) { openForm(); toast('تم الحفظ ✓'); } else { closeSheet(); toast('تم الحفظ ✓'); }
   if (F.type === 'exp') setTimeout(budgetCheck, 2400);
@@ -766,7 +790,7 @@ document.addEventListener('click', e => {
       break; }
     case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else { S.smsAsk = true; AndroidBridge.requestSms(); } break;
     case 'opensettings': AndroidBridge.openSettings(); break;
-    case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const n = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(n ? 'أُضيفت للمراجعة في الرئيسية' : 'لم أتعرف على عملية مالية في هذه الرسالة'); S.tab = 'home'; render(); }); break;
+    case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const r = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(r.pending ? 'أُضيفت للمراجعة' : r.maybe ? 'لم أجزم أنها عملية، راجعها في الرسائل' : r.auto ? 'سُجّلت العملية' : 'اعتبرتها رسالة غير مالية، تجدها في الرسائل المتجاهلة'); S.tab = 'inbox'; S.enter = true; render(); }); break;
     case 'autotoggle': set.auto = !set.auto; save(); render(); toast(set.auto ? 'الرسائل المعروفة الفئة تُسجَّل مباشرة، وغير المعروفة تنتظر مراجعتك' : 'كل الرسائل تنتظر مراجعتك'); break;
     case 'recs': recsSheet(); break;
     case 'recnew': recForm(); break;
@@ -780,6 +804,11 @@ document.addEventListener('click', e => {
       save(); runRecurring(); recsSheet(); render(); break; }
     case 'recdel': S.d.rec = S.d.rec.filter(r => r.id !== F.rid); save(); recsSheet(); render(); break;
     case 'sharehelp': sheet(`<div class="sh"><b>القراءة التلقائية للرسائل</b><button class="x" data-act="close">✕</button></div><div class="card" style="line-height:2">النسخة المثبّتة عندك <b>لا تملك صلاحية قراءة الرسائل</b>، لذلك لا تسجّل شيئاً من تلقاء نفسها.<br>لتفعيل القراءة التلقائية ثبّت <b>النسخة الكاملة</b> (ملف <b>masrouf.apk</b> من الرابط الأساسي) فوق هذه النسخة.<br>وإلى ذلك الحين: افتح الرسالة ثم <b>مشاركة</b> واختر <b>مصروفي</b>.</div>`); break;
+    case 'goinbox': S.tab = 'inbox'; S.enter = true; render(); scrollTo(0, 0); break;
+    case 'mrec': { const x = S.d.maybe.find(y => y.id === D.id); openForm(null, {...x, type: x.type || 'exp', amount: x.amount || '', cat: x.cat || 'other', date: x.date || todayStr(), time: x.time || '', note: x.merchant || ''}); break; }
+    case 'grec': { const x = S.d.ignored.find(y => y.id === D.id), r = SmsParser.parseLoose(x.body, x.ts) || {}; openForm(null, {id: x.id, type: r.type || 'exp', amount: r.amount || '', cat: r.cat || 'other', date: r.date || todayStr(), time: r.time || '', merchant: r.merchant || '', note: r.merchant || ''}); break; }
+    case 'mno': S.d.maybe = S.d.maybe.filter(y => y.id !== D.id); S.d.ignored = S.d.ignored.filter(y => y.id !== D.id); save(); render(); break;
+    case 'gclear': S.d.ignored = []; save(); render(); break;
     case 'pok': confirmPending(D.id); break;
     case 'pno': S.d.pending = S.d.pending.filter(x => x.id !== D.id); save(); render(); break;
     case 'pall': [...S.d.pending].forEach(x => confirmPending(x.id, true)); toast('تم تأكيد كل العمليات'); break;
@@ -863,30 +892,46 @@ function recForm(id) {
 const mkey = m => String(m || '').toLowerCase().replace(/\s+/g, ' ').trim();
 function learn(merchant, cat) { const k = mkey(merchant); if (k) S.d.merchants[k] = cat; }
 function ingestSms(list) {
-  let added = 0;
+  const res = {pending: 0, auto: 0, maybe: 0, ignored: 0};
   list.forEach(m => {
-    const key = (m.sender || '') + '|' + m.ts + '|' + String(m.body).length + '|' + String(m.body).slice(0, 40);
-    if (S.d.seen.includes(key)) return;
-    const r = SmsParser.parseSms(m.body, m.ts); S.d.seen.push(key);
-    if (!r) return;
-    const k = mkey(r.merchant); if (r.type === 'exp' && S.d.merchants[k]) r.cat = S.d.merchants[k];
-    if (S.d.set.auto && r.cat !== 'other') { S.d.tx.push({id: uid(), ts: Date.now(), type: r.type, amount: r.amount, cat: r.cat, note: r.merchant || '', date: r.date, time: r.time, auto: true}); learn(r.merchant, r.cat); S.auto = (S.auto || 0) + 1; }
-    else S.d.pending.push({id: uid(), sender: m.sender, ...r});
-    added++;
+    const body = String(m.body || '');
+    const key = (m.sender || '') + '|' + m.ts + '|' + body.length + '|' + body.slice(0, 40);
+    if (S.d.seen.includes(key)) return; S.d.seen.push(key);
+    let kind = m.k || SmsParser.classify(body), r = SmsParser.parseLoose(body, m.ts);
+    if (kind === 'txn' && !r) {   // الجهة المصنِّفة (جافا) جزمت بعملية: نعتمد مبلغها وتاجرها حتى لا يضيع الإشعار
+      const amt = parseFloat(m.amt), d = new Date(m.ts || Date.now());
+      if (amt > 0) r = {type: /(إيداع|ايداع|راتب|واردة|credited|received|refund|استرداد)/i.test(body) ? 'inc' : 'exp', amount: amt, merchant: m.mer || '', date: ymd(d), time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, cat: 'other'};
+      else kind = 'maybe';
+    }
+    if (r && r.type === 'exp') { const k = mkey(r.merchant); if (S.d.merchants[k]) r.cat = S.d.merchants[k]; }
+    if (kind === 'txn' && r) {
+      if (S.d.set.auto && r.cat !== 'other') { S.d.tx.push({id: uid(), ts: Date.now(), type: r.type, amount: r.amount, cat: r.cat, note: r.merchant || '', date: r.date, time: r.time, auto: true}); learn(r.merchant, r.cat); res.auto++; S.auto = (S.auto || 0) + 1; }
+      else { S.d.pending.push({id: uid(), sender: m.sender, body: body.slice(0, 300), ...r}); res.pending++; }
+    } else if (kind === 'maybe') { S.d.maybe.push({id: uid(), sender: m.sender, ts: m.ts, body: body.slice(0, 300), ...(r || {})}); res.maybe++; }
+    else { S.d.ignored.unshift({id: uid(), sender: m.sender, ts: m.ts, body: body.slice(0, 300)}); res.ignored++; }
   });
-  S.d.seen = S.d.seen.slice(-400); save(); return added;
+  S.d.ignored = S.d.ignored.slice(0, 40); S.d.seen = S.d.seen.slice(-400); save(); return res;
 }
 function confirmPending(id, quiet) {
   const x = S.d.pending.find(y => y.id === id); if (!x) return;
-  S.d.tx.push({id: uid(), ts: Date.now(), type: x.type, amount: x.amount, cat: x.cat, note: x.merchant || '', date: x.date, time: x.time});
+  S.d.tx.push({id: uid(), ts: Date.now(), type: x.type, amount: x.amount, cat: x.cat, note: x.merchant || '', date: x.date, time: x.time, sms: true});
   learn(x.merchant, x.cat); S.d.pending = S.d.pending.filter(y => y.id !== id); save(); render(); haptic(18);
   if (!quiet) { toast('تم تسجيل العملية ✓'); setTimeout(budgetCheck, 2400); }
 }
+function handleLaunch() {
+  if (!window.AndroidBridge || !AndroidBridge.takeAction) return;
+  const a = AndroidBridge.takeAction();
+  if (a === 'inbox') { S.tab = 'inbox'; S.enter = true; render(); scrollTo(0, 0); } else if (a === 'add') openForm();
+}
 function pullSms() {
   if (!window.AndroidBridge) return;
-  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]'); if (arr.length && ingestSms(arr)) { render(); toast(S.auto ? 'سُجّلت عملية من رسالة البنك 📩' : 'وصلت عملية جديدة للمراجعة 📩'); S.auto = 0; setTimeout(budgetCheck, 2400); } } catch (e) {}
+  try { const arr = JSON.parse(AndroidBridge.takeSms() || '[]');
+    if (arr.length) { const r = ingestSms(arr); render();
+      if (r.pending) toast(r.pending > 1 ? `وصلت ${dg(r.pending)} عمليات للمراجعة` : 'وصلت عملية جديدة للمراجعة'); else if (r.auto) toast('سُجّلت عملية من رسالة البنك'); S.auto = 0;
+      if (r.auto) setTimeout(budgetCheck, 2400); } } catch (e) {}
+  handleLaunch();
 }
-window.smsStatusChanged = () => { render(); pullSms(); if (S.smsAsk) { S.smsAsk = false; if (window.AndroidBridge && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) smsHelp(); else if (window.AndroidBridge && AndroidBridge.hasSms()) toast('تم تفعيل قراءة الرسائل ✓'); } };
+window.smsStatusChanged = () => { render(); pullSms(); handleLaunch(); if (S.smsAsk) { S.smsAsk = false; if (window.AndroidBridge && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) smsHelp(); else if (window.AndroidBridge && AndroidBridge.hasSms()) toast('تم تفعيل قراءة الرسائل ✓'); } };
 function smsHelp() {
   sheet(`<div class="sh"><b>تفعيل قراءة الرسائل</b><button class="x" data-act="close">✕</button></div>
     <div class="card" style="line-height:2"><b>إن لم تظهر نافذة الإذن أو رُفض، فاتّبع الخطوات:</b><br>

@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 public class MainActivity extends Activity {
     WebView wv;
     ValueCallback<Uri[]> fileCb;
+    String launchAction = "";
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -78,15 +79,16 @@ public class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent i) { super.onNewIntent(i); handleShare(i); }
 
     void handleShare(Intent i) {
-        if (i != null && "app.masrouf.ADD".equals(i.getAction())) {
+        if (i != null && ("app.masrouf.ADD".equals(i.getAction()) || "app.masrouf.INBOX".equals(i.getAction()))) {
+            launchAction = "app.masrouf.INBOX".equals(i.getAction()) ? "inbox" : "add";
             i.setAction(null);
-            wv.postDelayed(() -> wv.evaluateJavascript("window.openForm&&openForm()", null), 900);
+            wv.postDelayed(() -> wv.evaluateJavascript("window.smsStatusChanged&&smsStatusChanged()", null), 700);
             return;
         }
         if (i == null || !Intent.ACTION_SEND.equals(i.getAction())) return;
         String t = i.getStringExtra(Intent.EXTRA_TEXT);
         if (t == null || t.trim().isEmpty()) return;
-        try { SmsReceiver.push(this, "مشاركة", t, System.currentTimeMillis()); } catch (Exception e) { return; }
+        try { SmsReceiver.push(this, "مشاركة", t, System.currentTimeMillis(), SmsClassifier.of(t)); } catch (Exception e) { return; }
         i.setAction(null);
         wv.postDelayed(() -> wv.evaluateJavascript("window.smsStatusChanged&&smsStatusChanged()", null), 700);
     }
@@ -108,6 +110,7 @@ public class MainActivity extends Activity {
     }
 
     class Bridge {
+        @JavascriptInterface public String takeAction() { String a = launchAction; launchAction = ""; return a; }
         @JavascriptInterface public void openSettings() {
             runOnUiThread(() -> startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))));
         }

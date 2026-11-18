@@ -64,28 +64,42 @@
       if (h < 24 && mi < 60) { if (/^p|م/.test(ap) && h < 12) h += 12; if (/^a|ص/.test(ap) && h === 12) h = 0; return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0'); } }
     const f = new Date(ts || Date.now()); return String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
   }
-  function parseSms(body, ts) {
-    const t = norm(body);
-    if (!t || SKIP.test(t)) return null;
-    // استبعاد جزء الرصيد حتى لا يُلتقط كمبلغ
-    const main = t.replace(/(?:الرصيد|رصيدك|رصيد|balance|bal|avl|remaining\s*limit|available)[^\n]*/ig, ' ');
-    let type = null;
+  /* ===== التصنيف: txn = عملية مؤكدة، maybe = غير مؤكدة، ignore = ليست عملية =====
+     تُنسخ هذه القواعد حرفياً في SmsClassifier.java؛ وملف tests/sms-corpus.txt يتحقق من تطابقهما. */
+  const L = '(?<![\\p{L}\\p{N}])', R = '(?![\\p{L}\\p{N}])';
+  const SKIP2 = new RegExp('(?:رمز|otp|كلمة\\s*(?:السر|المرور)|verification|one.?time|لا\\s*تشارك|do\\s*not\\s*share|تم\\s*رفض|رفض|declined|فشل|failed|unsuccessful|insufficient|غير\\s*كاف|تعذر|تم\\s*إيقاف)', 'iu');
+  const PROMO = new RegExp('(?:\\d\\s*(?:%|٪)|(?<![\\p{L}])(?:عرض|عروض|احصل|استمتع|وفر|وفّر|تخفيض|تخفيضات|خصومات|تهانينا|مبروك|فزت|جائزة|جوائز|مسابقة|اربح|سارع|فرصتك|للمزيد|لمعرفة|اضغط|قدم\\s*الآن|قدّم\\s*الآن|حمّل|حمل\\s*التطبيق)|خصم\\s*(?:يصل|حتى|على)|كود\\s*(?:الخصم|خصم)|promo|offer|discount|coupon|congratulations|apply\\s*now|download|click|https?:|www\\.)', 'iu');
+  const STRONG = new RegExp(L + '(?:شراء|مشتريات|سحب\\s*(?:نقدي|من)|حوالة\\s*(?:صادرة|واردة|محلية|دولية)|تحويل\\s*(?:صادر|وارد)|إيداع|ايداع|سداد|استرداد|راتب|تم\\s*(?:خصم|تحويل|دفع|إيداع|ايداع|سحب|شراء)|خصم\\s*(?:مبلغ|رسوم|فاتورة)|purchase|pos|withdrawal|withdraw|atm|debited|debit|credited|transfer|bill\\s*payment|payment|refund|paid|received|salary)' + R, 'iu');
+  const WEAK = new RegExp('(?:خصم|مبلغ|دفع|حوالة|تحويل|amount|amt|deducted)', 'iu');
+  const BAL = /(?:الرصيد|رصيدك|رصيد|balance|bal|avl|remaining\s*limit|available)[^\n]*/ig;
+  const AMTP = [
+    new RegExp('(?:مبلغ|بمبلغ|amount|amt|value)\\s*:?\\s*' + CUR + '?\\s*' + NUM, 'i'),
+    new RegExp(CUR + '\\s*:?\\s*' + NUM, 'i'),
+    new RegExp(NUM + '\\s*' + CUR, 'i')
+  ];
+  function findAmount(main) { for (const re of AMTP) { const m = main.match(re); if (m) { const v = parseFloat(m[1].replace(/,/g, '')); if (v > 0) return v; } } return 0; }
+  function classify(body) {
+    const t = norm(body), main = t.replace(BAL, ' ');
+    if (!t.trim() || SKIP2.test(main)) return 'ignore';
+    if (!(findAmount(main) > 0)) return 'ignore';
+    const strong = STRONG.test(main), promoN = (main.match(new RegExp(PROMO.source, 'giu')) || []).length, promo = promoN > 0;
+    if (promoN >= 2 || (promo && !strong)) return 'ignore';
+    if (strong) return promo ? 'maybe' : 'txn';
+    return WEAK.test(main) ? 'maybe' : 'ignore';
+  }
+  /* استخراج الحقول دون حكم على الرسالة (يُستعمل بعد التصنيف) */
+  function parseLoose(body, ts) {
+    const t = norm(body), main = t.replace(BAL, ' ');
+    let type = 'exp';
     const e = main.search(EXP), i = main.search(INC);
-    if (e >= 0 && (i < 0 || e <= i)) type = 'exp'; else if (i >= 0) type = 'inc';
-    if (!type) return null;
-    const pats = [
-      new RegExp('(?:مبلغ|بمبلغ|amount|amt|value)\\s*:?\\s*' + CUR + '?\\s*' + NUM, 'i'),
-      new RegExp(CUR + '\\s*:?\\s*' + NUM, 'i'),
-      new RegExp(NUM + '\\s*' + CUR, 'i')
-    ];
-    let amount = 0;
-    for (const re of pats) { const m = main.match(re); if (m) { amount = parseFloat(m[1].replace(/,/g, '')); break; } }
-    if (!(amount > 0)) return null;
+    if (i >= 0 && (e < 0 || i < e)) type = 'inc';
+    const amount = findAmount(main); if (!(amount > 0)) return null;
     let merchant = '';
     const mm = main.match(/(?:لدى|عند|من\s*متجر|التاجر|\bmerchant\b|\bat\b|\bto\b|\bfrom\b|\bbiller\b|المستفيد|الجهة|الى|إلى|(?<=^|\s)من)\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i);
     if (mm) merchant = mm[1].replace(/[*:]+$/g, '').replace(/^[\s:*-]+|[\s:*-]+$/g, '').slice(0, 40);
     return {type, amount, merchant, date: parseDate(t, ts), time: parseTime(t, ts), cat: type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main)};
   }
-  const api = {parseSms, guessCat};
+  function parseSms(body, ts) { return classify(body) === 'txn' ? parseLoose(body, ts) : null; }
+  const api = {parseSms, parseLoose, classify, guessCat};
   if (typeof module !== 'undefined') module.exports = api; else root.SmsParser = api;
 })(this);

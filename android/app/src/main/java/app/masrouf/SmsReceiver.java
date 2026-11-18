@@ -26,15 +26,17 @@ public class SmsReceiver extends BroadcastReceiver {
         StringBuilder body = new StringBuilder();
         for (SmsMessage m : parts) body.append(m.getMessageBody());
         String text = body.toString();
-        if (!FIN.matcher(text).find()) return;
+        if (!FIN.matcher(text).find()) return;   // رسائل غير مالية لا تُخزَّن إطلاقاً
         try {
-            push(c, parts[0].getOriginatingAddress(), text, parts[0].getTimestampMillis());
-            notifyUser(c, SmsPreview.of(text));
+            SmsClassifier k = SmsClassifier.of(text);
+            push(c, parts[0].getOriginatingAddress(), text, parts[0].getTimestampMillis(), k);
+            if (SmsClassifier.TXN.equals(k.kind)) notifyUser(c, k);   // إشعار للعمليات المؤكدة فقط
         } catch (Exception ignored) {}
     }
 
-    static void push(Context c, String sender, String text, long ts) throws Exception {
+    static void push(Context c, String sender, String text, long ts, SmsClassifier k) throws Exception {
         JSONObject o = new JSONObject();
+        if (k != null) { o.put("k", k.kind); if (k.amount != null) o.put("amt", k.amount); if (k.merchant != null) o.put("mer", k.merchant); }
         o.put("sender", sender);
         o.put("body", text);
         o.put("ts", ts);
@@ -42,7 +44,9 @@ public class SmsReceiver extends BroadcastReceiver {
             SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             JSONArray a = new JSONArray(sp.getString(KEY, "[]"));
             a.put(o);
-            sp.edit().putString(KEY, a.toString()).apply();
+            SharedPreferences.Editor ed = sp.edit().putString(KEY, a.toString());
+            if (k != null && SmsClassifier.TXN.equals(k.kind)) ed.putInt("n", sp.getInt("n", 0) + 1);
+            ed.apply();
         }
     }
 
@@ -50,20 +54,22 @@ public class SmsReceiver extends BroadcastReceiver {
         synchronized (SmsReceiver.class) {
             SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             String v = sp.getString(KEY, "[]");
-            sp.edit().remove(KEY).apply();
+            sp.edit().remove(KEY).putInt("n", 0).apply();
             return v;
         }
     }
 
-    static void notifyUser(Context c, SmsPreview p) {
+    static void notifyUser(Context c, SmsClassifier p) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.createNotificationChannel(new NotificationChannel("tx", "عمليات جديدة", NotificationManager.IMPORTANCE_HIGH));
-        PendingIntent pi = PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        String title = p.amount != null ? "عملية جديدة: " + p.amount + " ر.س" : "عملية جديدة من رسالة البنك";
-        String text = (p.merchant != null ? p.merchant + " — " : "") + "اضغط للمراجعة والتأكيد";
-        Notification n = new Notification.Builder(c, "tx").setSmallIcon(android.R.drawable.ic_menu_agenda)
+        int n = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("n", 1);
+        Intent open = new Intent(c, MainActivity.class).setAction("app.masrouf.INBOX").addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pi = PendingIntent.getActivity(c, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        String title = n > 1 ? n + " عمليات جديدة بانتظار مراجعتك" : (p.amount != null ? "عملية جديدة: " + p.amount + " ر.س" : "عملية جديدة من رسالة البنك");
+        String text = n > 1 ? "اضغط لمراجعتها وتأكيدها" : (p.merchant != null ? p.merchant + " — " : "") + "اضغط للمراجعة والتأكيد";
+        Notification nt = new Notification.Builder(c, "tx").setSmallIcon(android.R.drawable.ic_menu_agenda)
             .setContentTitle(title).setContentText(text).setStyle(new Notification.BigTextStyle().bigText(text))
             .setContentIntent(pi).setAutoCancel(true).build();
-        nm.notify((int) (System.currentTimeMillis() % 100000), n);
+        nm.notify(1001, nt);   // إشعار واحد يتحدّث بدل تكدّس عدة إشعارات
     }
 }
