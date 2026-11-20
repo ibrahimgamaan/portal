@@ -32,7 +32,7 @@ button{cursor:pointer;border:0;background:none}
 .top h1{font-size:20px;margin:0;font-weight:700;display:flex;gap:8px;align-items:center}
 .top h1 i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pri2),var(--pri));display:inline-block}
 .top .sub{color:var(--mute);font-size:13px}
-.view{padding:4px 16px 16px;display:grid;gap:14px}
+.view{padding:4px 16px 16px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.view>*{min-width:0}
 .card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border:1px solid var(--bd)}
 .card h3{margin:0 0 12px;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .card h3 a,.link{color:var(--pri);font-size:13px;font-weight:500;cursor:pointer}
@@ -93,7 +93,7 @@ small{font-weight:500}
 .bars .c.hi .bw i{background:linear-gradient(180deg,#fb7185,#e11d48)}
 .bars .c.sel .bw i{outline:2px solid var(--ink);outline-offset:1px}
 .bars .pv{position:absolute;inset-inline:0;margin:auto;width:100%;max-width:26px;height:3px;border-radius:2px;background:var(--mute);opacity:.7}
-.bars .c u{font-size:10px;color:var(--mute);text-decoration:none;margin-top:4px;height:14px;white-space:nowrap}
+.bars .c u{font-size:10.5px;color:var(--mute);text-decoration:none;margin-top:4px;height:14px;white-space:nowrap}
 .bars .c s{position:absolute;inset-inline:-4px;text-align:center;font-size:9.5px;color:var(--mute);text-decoration:none;white-space:nowrap}
 .tipline{text-align:center;color:var(--mute);font-size:12.5px;margin-top:8px;min-height:20px}
 .fab{position:fixed;bottom:calc(30px + env(safe-area-inset-bottom));left:0;right:0;margin-inline:auto;transform:none;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-size:34px;line-height:1;box-shadow:0 8px 22px rgba(15,118,110,.45);z-index:30;display:grid;place-items:center;border:4px solid var(--bg)}
@@ -138,7 +138,7 @@ input:focus,select:focus{border-color:var(--pri)}
 .colors{display:flex;gap:8px;flex-wrap:wrap}.colors i{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer}.colors i.on{border-color:var(--ink)}
 .pend{border:2px solid var(--pri2);background:var(--pri-soft)}
 .pend .tx{box-shadow:none;margin-bottom:8px;display:block}
-.pend .tx .top2{display:flex;align-items:center;gap:12px}
+.pend .tx .top2{display:flex;align-items:center;gap:12px;min-width:0}.pend .tx{min-width:0}
 .pb{display:flex;gap:6px;margin-top:10px}
 .pb button{flex:1;padding:9px;border-radius:11px;font-weight:600;font-size:13.5px;background:var(--bg)}
 .pb .ok{background:var(--pri);color:#fff}.pb .no{color:var(--exp)}
@@ -177,6 +177,19 @@ input:focus,select:focus{border-color:var(--pri)}
 .mrow .top2{display:flex;align-items:center;gap:10px}.mrow .top2 b{flex:1}.mrow .top2 em{font-style:normal;font-weight:700}
 details.card summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center}
 details.card summary::-webkit-details-marker{display:none}
+.pick{display:flex;align-items:center;gap:8px;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:13px;padding:9px 12px;text-align:start;min-width:0}
+.pick .pi{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none}.pick .pi svg{width:16px;height:16px}
+.pick b{flex:1;min-width:0;font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pick .cv{color:var(--mute);display:grid}
+.ov.pk{z-index:60}.pks{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+.pks .pkl{display:grid;gap:4px}
+.pkg{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--mute);margin:14px 4px 4px}.pkg:first-child{margin-top:2px}.pkg i{flex:1;height:1px;background:var(--line)}
+.pki{display:flex;align-items:center;gap:12px;width:100%;text-align:start;background:var(--card);border-radius:14px;padding:9px 12px;border:2px solid transparent;min-height:54px}
+.pki:active{background:var(--pri-soft)}
+.pki .pi{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.pki b{flex:1;min-width:0;font-weight:500;font-size:15px}
+.pki .ck{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--pri);opacity:0;flex:none}
+.pki.on{border-color:var(--pri);background:var(--pri-soft)}.pki.on b{font-weight:700}.pki.on .ck{opacity:1}
+.pki.all .pi{background:var(--pri-soft);color:var(--pri)}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -393,7 +406,7 @@ function series(mode, ref, list) {
     return {v, lab: MONTHS.map(m => m.slice(0, 3)), tip: MONTHS.slice()}; }
   const st = weekStart(ref), v = Array(7).fill(0); ex.forEach(t => { const i = Math.round((parse(t.date) - st) / 864e5); if (i >= 0 && i < 7) v[i] += t.amount; });
   const dn = i => DAYS[(st.getDay() + i) % 7];
-  return {v, lab: v.map((_, i) => dn(i).replace('ال', '').slice(0, 3)), tip: v.map((_, i) => { const d = new Date(st); d.setDate(d.getDate() + i); return `${dn(i)} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`; })};
+  return {v, lab: v.map((_, i) => dn(i)), tip: v.map((_, i) => { const d = new Date(st); d.setDate(d.getDate() + i); return `${dn(i)} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`; })};
 }
 const pctBadge = (cur, prev) => {
   if (!prev) return '';
@@ -414,7 +427,7 @@ function pendingCard(all) {
 function homeInsights(tx, now) {
   const days = [], vals = [], lab = [], tips = [];
   for (let i = 6; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i), k = ymd(d);
-    days.push(k); vals.push(sum(tx.filter(t => t.date === k))); lab.push(DAYS[d.getDay()].replace('ال', '').slice(0, 3)); tips.push(`${DAYS[d.getDay()]} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`); }
+    days.push(k); vals.push(sum(tx.filter(t => t.date === k))); lab.push(DAYS[d.getDay()]); tips.push(`${DAYS[d.getDay()]} ${dg(d.getDate())} ${MONTHS[d.getMonth()]}`); }
   if (!vals.some(v => v > 0)) return '';
   const mo = tx.filter(t => t.type === 'exp' && inPeriod(t, 'month', now));
   const byDay = {}, byNote = {};
@@ -479,7 +492,7 @@ function viewLog() {
   const groups = {}; list.forEach(t => (groups[t.date] ||= []).push(t));
   return `<div class="filters"><input type="search" id="q" placeholder="🔍 ابحث في الملاحظات والفئات" value="${esc(f.q)}">
     <select id="fm"><option value="">كل الشهور</option>${months.map(m => { const [y, mm] = m.split('-'); return `<option value="${m}" ${f.month === m ? 'selected' : ''}>${MONTHS[mm - 1]} ${dg(y)}</option>`; }).join('')}</select>
-    <select id="fc"><option value="">كل الفئات</option>${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<optgroup label="${g.name}">${cs.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}<optgroup label="الدخل">${INC_CATS.map(c => `<option value="${c.id}" ${f.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup></select></div>
+    ${catPickBtn('pickfc', f.cat, 'كل الفئات')}</div>
     <div class="hint" style="color:var(--mute);font-size:13px">${dg(list.length)} عملية · المصروف ${money(sum(list))}${sum(list, 'inc') ? ' · الدخل ' + money(sum(list, 'inc')) : ''}</div>
     ${list.length ? Object.keys(groups).map(d => `<div><div class="day"><span>${dayLabel(d)}</span><span>${money(sum(groups[d]))}</span></div>${groups[d].map(txRow).join('')}</div>`).join('') :
       '<div class="card empty"><div class="e">🔎</div><h3>لا توجد نتائج</h3></div>'}`;
@@ -581,6 +594,26 @@ function sheet(html) {
   $('#layer').innerHTML = `<div class="ov" data-act="close"><div class="sheet">${html}</div></div>`;
 }
 const closeSheet = () => { $('#layer').innerHTML = ''; };
+/* ============ منتقي الفئات ============ */
+const CK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const chipIc = c => `<span class="pi" style="background:${c.color}22;color:${c.color}">${I(c.icon, 22)}</span>`;
+function catPickBtn(act, id, allLabel) {
+  const c = id ? catOf(id) : null;
+  return `<button type="button" class="pick" data-act="${act}">${c ? chipIc(c) : `<span class="pi" style="background:var(--pri-soft);color:var(--pri)">${I('tags', 22)}</span>`}<b>${esc(c ? c.name : allLabel)}</b><span class="cv">${ic('chevron-down', 16)}</span></button>`;
+}
+function openCatPick(title, sel, withAll, incFirst, done) {
+  const item = c => `<button class="pki ${c.id === sel ? 'on' : ''}" data-act="pkset" data-id="${c.id}">${chipIc(c)}<b>${esc(c.name)}</b><span class="ck">${CK}</span></button>`;
+  const gh = n => `<div class="pkg">${esc(n)}<i></i></div>`;
+  let h = withAll ? `<button class="pki all ${!sel ? 'on' : ''}" data-act="pkset" data-id=""><span class="pi">${I('tags', 22)}</span><b>كل الفئات</b><span class="ck">${CK}</span></button>` : '';
+  const inc = INC_CATS.length ? gh('الدخل') + INC_CATS.map(item).join('') : '';
+  if (incFirst) h += inc;
+  GROUPS.forEach(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (cs.length) h += gh(g.name) + cs.map(item).join(''); });
+  if (!incFirst) h += inc;
+  window.__pkDone = done;
+  $('#layer').insertAdjacentHTML('beforeend', `<div class="ov pk" id="pk" data-act="pkclose"><div class="sheet pks"><div class="sh"><b>${esc(title)}</b><button class="x" data-act="pkclose">✕</button></div><div class="pkl">${h}</div></div></div>`);
+  const on = document.querySelector('#pk .pki.on'); if (on) on.scrollIntoView({block: 'center'});
+}
+
 
 let F = {}; // حالة نموذج الإضافة
 function calc(v) {
@@ -792,6 +825,10 @@ document.addEventListener('click', e => {
     case 'opensettings': AndroidBridge.openSettings(); break;
     case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const r = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(r.pending ? 'أُضيفت للمراجعة' : r.maybe ? 'لم أجزم أنها عملية، راجعها في الرسائل' : r.auto ? 'سُجّلت العملية' : 'اعتبرتها رسالة غير مالية، تجدها في الرسائل المتجاهلة'); S.tab = 'inbox'; S.enter = true; render(); }); break;
     case 'autotoggle': set.auto = !set.auto; save(); render(); toast(set.auto ? 'الرسائل المعروفة الفئة تُسجَّل مباشرة، وغير المعروفة تنتظر مراجعتك' : 'كل الرسائل تنتظر مراجعتك'); break;
+    case 'pickfc': openCatPick('تصفية حسب الفئة', S.f.cat, true, false, id => { S.f.cat = id; render(); }); break;
+    case 'pickrc': openCatPick('اختر الفئة', $('#rc').value, false, false, id => { $('#rc').value = id; $('#rcb').innerHTML = catPickBtn('pickrc', id); }); break;
+    case 'pkset': { const f = window.__pkDone; $('#pk')?.remove(); haptic(8); if (f) f(D.id); break; }
+    case 'pkclose': if (e.target === el || el.classList.contains('x')) $('#pk')?.remove(); break;
     case 'recs': recsSheet(); break;
     case 'recnew': recForm(); break;
     case 'recedit': recForm(D.id); break;
@@ -882,8 +919,7 @@ function recForm(id) {
   sheet(`<div class="sh"><b>${id ? 'تعديل البند' : 'بند متكرر جديد'}</b><button class="x" data-act="close">✕</button></div>
     <div class="fld"><input id="rn" type="text" placeholder="الاسم (مثال: إيجار الشقة)" value="${esc(r.note)}" maxlength="60"></div>
     <div class="amt exp"><input id="ra" inputmode="decimal" placeholder="المبلغ" value="${r.amount}"><span>${esc(S.d.set.cur)}</span></div>
-    <div class="fld"><select id="rc"><optgroup label="مصروفات">${GROUPS.flatMap(g => S.d.cats.filter(c => (c.group || 'other') === g.id)).map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup>
-      <optgroup label="دخل">${INC_CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup></select></div>
+    <div class="fld"><input type="hidden" id="rc" value="${r.cat}"><div id="rcb" style="width:100%">${catPickBtn('pickrc', r.cat)}</div></div>
     <div class="fld"><input id="rd" type="number" min="1" max="28" inputmode="numeric" placeholder="يوم الشهر (من 1 إلى 28)" value="${r.day}"></div>
     <div class="btns">${id ? '<button class="btn d" data-act="recdel">حذف</button>' : ''}<button class="btn p" data-act="recsave">حفظ</button></div>`);
 }
