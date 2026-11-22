@@ -8,6 +8,7 @@
   const EXP = /(شراء|مشتريات|سحب|خصم|دفع|سداد|حوالة\s*صادرة|تحويل\s*صادر|حوالة\s*محلية|فاتورة|اشتراك|purchase|pos|withdraw|debit|paid|payment|sent|transfer|outgoing|bill\s*pay|atm|online|sadad)/i;
   const INC = /(إيداع|ايداع|حوالة\s*واردة|تحويل\s*وارد|راتب|استلام|استرداد|credited|deposit|received|refund|salary|incoming)/i;
   const CATS = [
+    ['carwash', /(غسيل\s*سيارات|غسيل\s*السيارات|مغسلة\s*سيارات|تلميع|car\s*wash|carwash|كار\s*واش)/i],
     ['gov', /(أبشر|ابشر|جوازات|وزارة|بلدية|absher|moi\b|passport|municipal|توثيق|ناجز|najiz|قوى|muqeem|مقيم)/i],
     ['tech', /(إكسترا|اكسترا|extra\b|جرير|jarir|apple\s*store|samsung|الكترونيات|إلكترونيات|electronics|xcite|اكس سايت|stc\s*shop|جوال|mobile\s*shop)/i],
     ['furn', /(ايكيا|ikea|هوم سنتر|home\s*cent|أثاث|اثاث|مفروشات|furniture|danube\s*home|ساكو|saco|safco|home\s*box)/i],
@@ -22,13 +23,17 @@
     ['charity', /(زكاة|زكاه|صدقة|صدقه|تبرع|جمعية|إحسان|احسان|وقف|ehsan|charity|donat|zakat|sadaqah|waqf)/i],
     ['loan', /(قسط|أقساط|اقساط|تمويل|قرض|تابي|تمارا|installment|loan|finance|tabby|tamara|tasheel|تسهيل)/i],
     ['subs', /(اشتراك|netflix|نتفلكس|شاهد|shahid|spotify|youtube\s*premium|anghami|osn|icloud|google\s*one|apple\.com\/bill|subscription|disney|prime video|chatgpt|openai)/i],
-    ['car', /(ورشة|ورشه|صيانة|صيانه|زيت|إطارات|اطارات|مغسلة|غسيل سيارات|فحص دوري|مركز خدمة|workshop|garage|tire|tyre|car\s*wash|auto\s*service|oil change|lube|motor|وكالة)/i],
+    ['car', /(ورشة|ورشه|صيانة|صيانه|زيت|إطارات|اطارات|مغسلة|غسيل سيارات|فحص دوري|مركز خدمة|workshop|garage|tire|tyre|auto\s*service|oil change|lube|motor|وكالة)/i],
     ['travel', /(طيران|الخطوط|تذاكر|تذكرة|فندق|حجز|سياحة|تأشيرة|flynas|flyadeal|saudia|airlines|airline|booking\.com|hotel|airbnb|agoda|flight|tourism|visa fee|trip)/i],
     ['care', /(صالون|حلاق|حلاقة|عطور|عطر|عناية|مستحضرات|salon|barber|spa\b|perfume|beauty|sephora|nice\s*one|نايس ون|cosmetic)/i],
     ['food', /(شاورما|شعبيات|مخبز|حلويات|فلافل|مشاوي|عصير|shawerma|shawarma|shabyat|folwat|bakery|sweets|juice|grill|rest(?:au|u)r|falafel|مطعم|مطاعم|كافيه|كوفي|قهوة|ستاربكس|برجر|بيتزا|هنقرستيشن|جاهز|كودو|هرفي|البيك|دومينوز|ماكدونالد|coffee|cafe|restaurant|kudu|herfy|albaik|starbucks|hungerstation|jahez|mcdonald|burger|dunkin|tim hortons)/i],
     ['groc', /(بنده|الدانوب|التميمي|نستو|كارفور|بقالة|سوبرماركت|هايبر|لولو|العثيم|panda|danube|tamimi|nesto|carrefour|lulu|othaim|grocery|supermarket|hyper)/i],
     ['trans', /(ساسكو|أدنوك|ادنوك|وقود|بنزين|محطة|الدريس|petrol|sasco|aldrees|fuel|parking|مواقف|بولت|bolt)/i],
-    ['bills', /(stc|زين|موبايلي|سلام|كهرباء|مياه|السعودية للكهرباء|فاتورة|سداد|اتصالات|mobily|zain|salam|electric|water|nwc|sec\b|sadad)/i],
+    ['elec', /(كهرباء|السعودية\s*للكهرباء|saudi\s*electricity|electric|\bsec\b)/i],
+    ['water', /(مياه|المياه\s*الوطنية|\bnwc\b|water\s*bill|\bwater\b)/i],
+    ['telecom', /(stc|زين|موبايلي|سلام|اتصالات|إنترنت|انترنت|فايبر|mobily|zain|salam|internet|fiber|fibre|telecom)/i],
+    ['gas', /((?:^|\s)غاز(?=\s|$)|الغاز|اسطوانة|gas\s*bill|gas\s*cylinder)/i],
+    ['bills', /(فاتورة|سداد|sadad|bill\s*payment)/i],
     ['health', /(صيدلية|النهدي|الدواء|مستشفى|عيادة|مركز طبي|nahdi|pharmacy|clinic|hospital|dawaa|medical)/i],
     ['edu', /(مدرسة|جامعة|اكاديمية|أكاديمية|دورة|school|university|academy|course|udemy)/i],
     ['shop', /(امازون|أمازون|amazon|noon|نون|شي ان|shein|اكسترا|extra|ايكيا|ikea|زارا|zara|سنتربوينت|centrepoint|h&m|namshi|نمشي|mall|مول|جرير|jarir)/i],

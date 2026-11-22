@@ -228,8 +228,9 @@ const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const PALETTE = ['#f97316','#16a34a','#0ea5e9','#8b5cf6','#eab308','#ef4444','#6366f1','#ec4899','#14b8a6','#f43f5e','#a855f7','#64748b'];
 const GROUPS = [
-  {id:'food',name:'الطعام',icon:'utensils',color:'#f97316'},
+  {id:'food',name:'الطعام والتموينات',icon:'utensils',color:'#f97316'},
   {id:'house',name:'السكن والبيت',icon:'house',color:'#8b5cf6'},
+  {id:'utilities',name:'فواتير وخدمات',icon:'lightbulb',color:'#d97706'},
   {id:'trans',name:'المواصلات والسيارة',icon:'car',color:'#0ea5e9'},
   {id:'parents',name:'مصاريف الأهل',icon:'handshake',color:'#0d9488'},
   {id:'family',name:'الأسرة',icon:'users',color:'#a855f7'},
@@ -243,12 +244,17 @@ const DEF_CATS = [
   {id:'food',group:'food',name:'مطاعم وقهوة',icon:'utensils',color:'#f97316'},
   {id:'groc',group:'food',name:'بقالة ومواد غذائية',icon:'shopping-cart',color:'#16a34a'},
   {id:'home',group:'house',name:'سكن وإيجار',icon:'house',color:'#8b5cf6'},
-  {id:'bills',group:'house',name:'فواتير وخدمات',icon:'lightbulb',color:'#eab308'},
+  {id:'elec',group:'utilities',name:'كهرباء',icon:'zap',color:'#eab308'},
+  {id:'water',group:'utilities',name:'مياه',icon:'droplets',color:'#06b6d4'},
+  {id:'telecom',group:'utilities',name:'اتصالات وإنترنت',icon:'wifi',color:'#6366f1'},
+  {id:'gas',group:'utilities',name:'غاز',icon:'flame',color:'#fb923c'},
+  {id:'bills',group:'utilities',name:'فواتير أخرى',icon:'receipt',color:'#94a3b8'},
   {id:'repair',group:'house',name:'صيانة منزلية',icon:'wrench',color:'#78716c'},
   {id:'furn',group:'house',name:'أثاث ومستلزمات البيت',icon:'sofa',color:'#a16207'},
   {id:'laundry',group:'house',name:'غسيل ملابس',icon:'shirt',color:'#38bdf8'},
   {id:'trans',group:'trans',name:'وقود',icon:'fuel',color:'#0ea5e9'},
   {id:'car',group:'trans',name:'السيارة وصيانتها',icon:'car',color:'#0369a1'},
+  {id:'carwash',group:'trans',name:'غسيل السيارة',icon:'sparkles',color:'#22d3ee'},
   {id:'carins',group:'trans',name:'تأمين السيارة',icon:'shield-check',color:'#1e40af'},
   {id:'taxi',group:'trans',name:'أجرة ومواصلات',icon:'car-taxi-front',color:'#f59e0b'},
   {id:'fines',group:'trans',name:'سداد مخالفات',icon:'triangle-alert',color:'#dc2626'},
@@ -275,6 +281,7 @@ const DEF_CATS = [
   {id:'other',group:'other',name:'أخرى',icon:'package',color:'#64748b'}
 ];
 const REMOVED = {pet: 'other', maid: 'other', ins: 'medins'};
+const V6_NEW = ['elec', 'water', 'telecom', 'gas', 'carwash'];
 const INC_CATS = [
   {id:'salary',name:'راتب',icon:'briefcase',color:'#16a34a'},
   {id:'extra',name:'دخل إضافي',icon:'coins',color:'#0d9488'},
@@ -294,11 +301,20 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5'], rec: [], maybe: [], ignored: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5', 'v6'], rec: [], maybe: [], ignored: []
 });
 function migrate() {
   S.d.maybe = S.d.maybe || []; S.d.ignored = S.d.ignored || [];
   S.d.migr = S.d.migr || []; S.d.rec = S.d.rec || []; S.d.pending = S.d.pending || []; S.d.merchants = S.d.merchants || {};
+  if (!S.d.migr.includes('v6') && S.d.migr.includes('v5')) {
+    const have = new Set(S.d.cats.map(c => c.id));
+    S.d.cats.forEach(c => { const d = DEF_CATS.find(x => x.id === c.id); if (d) { c.group = d.group; if (c.id === 'bills') { c.name = d.name; c.icon = d.icon; } } });
+    V6_NEW.forEach(id => { if (!have.has(id)) S.d.cats.push({...DEF_CATS.find(x => x.id === id), budget: 0}); });
+    const order = DEF_CATS.map(c => c.id), oi = order.indexOf('other');
+    const key = c => { const i = order.indexOf(c.id); return i >= 0 ? i : oi - .5; };
+    S.d.cats = S.d.cats.map((c, i) => ({c, i})).sort((a, b) => key(a.c) - key(b.c) || a.i - b.i).map(x => x.c);
+    S.d.migr.push('v6');
+  }
   if (!S.d.migr.includes('v5') && S.d.migr.includes('v4')) {
     S.d.cats.forEach(c => { const d = DEF_CATS.find(x => x.id === c.id); if (d && !ICON_SVG[c.icon]) c.icon = d.icon; });
     S.d.migr.push('v5');
@@ -315,7 +331,7 @@ function migrate() {
   const out = DEF_CATS.map(d => byId[d.id] ? {...byId[d.id], name: d.name, group: d.group} : {...d, budget: 0});
   const custom = old.filter(c => !ids.includes(c.id) && !REMOVED[c.id]).map(c => ({...c, group: c.group || 'other'}));
   out.splice(out.length - 1, 0, ...custom);
-  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b', 'v5'];
+  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b', 'v5', 'v6'];
 }
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date(), by: 'cat'}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
