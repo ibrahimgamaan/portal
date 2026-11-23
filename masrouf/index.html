@@ -193,6 +193,8 @@ details.card summary::-webkit-details-marker{display:none}
 .stp{display:flex;gap:12px;align-items:flex-start;padding:9px 0;font-size:14px;line-height:1.7}.stp i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:13px}
 .stp.done i{background:var(--pri);color:#fff}.stp.done span{color:var(--mute)}
 .pend .tx .t span{white-space:normal}
+.pki.gi{background:var(--pri-soft)}.pki.gi b{font-weight:700;color:var(--pri)}
+.pks .srch{margin:0 0 8px}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -253,8 +255,9 @@ const DEF_CATS = [
   {id:'gas',group:'utilities',name:'غاز',icon:'flame',color:'#fb923c'},
   {id:'bills',group:'utilities',name:'فواتير أخرى',icon:'receipt',color:'#94a3b8'},
   {id:'repair',group:'house',name:'صيانة منزلية',icon:'wrench',color:'#78716c'},
-  {id:'furn',group:'house',name:'أثاث ومستلزمات البيت',icon:'sofa',color:'#a16207'},
+  {id:'supplies',group:'house',name:'مستلزمات البيت',icon:'wrench',color:'#b45309'},
   {id:'laundry',group:'house',name:'غسيل ملابس',icon:'shirt',color:'#38bdf8'},
+  {id:'furn',group:'house',name:'أثاث',icon:'sofa',color:'#a16207'},
   {id:'trans',group:'trans',name:'وقود',icon:'fuel',color:'#0ea5e9'},
   {id:'car',group:'trans',name:'السيارة وصيانتها',icon:'car',color:'#0369a1'},
   {id:'carwash',group:'trans',name:'غسيل السيارة',icon:'sparkles',color:'#22d3ee'},
@@ -304,7 +307,7 @@ const toLatin = s => String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).repla
 /* ============ الحالة ============ */
 const defaults = () => ({
   tx: [], pending: [], merchants: {}, seen: [], cats: DEF_CATS.map(c => ({...c, budget: 0})),
-  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5', 'v6'], rec: [], maybe: [], ignored: []
+  set: {cur: 'ر.س', budget: 0, digits: 'latin', theme: 'auto', auto: false}, migr: ['v4', 'v4b', 'v5', 'v6', 'v7'], rec: [], maybe: [], ignored: []
 });
 function migrate() {
   S.d.maybe = S.d.maybe || []; S.d.ignored = S.d.ignored || [];
@@ -317,6 +320,14 @@ function migrate() {
     const key = c => { const i = order.indexOf(c.id); return i >= 0 ? i : oi - .5; };
     S.d.cats = S.d.cats.map((c, i) => ({c, i})).sort((a, b) => key(a.c) - key(b.c) || a.i - b.i).map(x => x.c);
     S.d.migr.push('v6');
+  }
+  if (!S.d.migr.includes('v7') && S.d.migr.includes('v6')) {
+    // إضافة فقط: لا نعيد تسمية شيء ولا نكرّر فئة أضافها المستخدم بنفسه بنفس الاسم
+    if (!S.d.cats.some(c => c.id === 'supplies' || c.name === 'مستلزمات البيت')) {
+      const i = S.d.cats.findIndex(c => c.id === 'repair');
+      S.d.cats.splice(i < 0 ? Math.max(S.d.cats.length - 1, 0) : i + 1, 0, {...DEF_CATS.find(x => x.id === 'supplies'), budget: 0});
+    }
+    S.d.migr.push('v7');
   }
   if (!S.d.migr.includes('v5') && S.d.migr.includes('v4')) {
     S.d.cats.forEach(c => { const d = DEF_CATS.find(x => x.id === c.id); if (d && !ICON_SVG[c.icon]) c.icon = d.icon; });
@@ -334,7 +345,7 @@ function migrate() {
   const out = DEF_CATS.map(d => byId[d.id] ? {...byId[d.id], name: d.name, group: d.group} : {...d, budget: 0});
   const custom = old.filter(c => !ids.includes(c.id) && !REMOVED[c.id]).map(c => ({...c, group: c.group || 'other'}));
   out.splice(out.length - 1, 0, ...custom);
-  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b', 'v5', 'v6'];
+  S.d.cats = out; S.d.migr = ['v2', 'v3', 'v4', 'v4b', 'v5', 'v6', 'v7'];
 }
 let S = {tab: 'home', rep: {mode: 'month', ref: new Date(), by: 'cat'}, f: {q: '', cat: '', month: ''}, d: defaults()};
 function load() {
@@ -348,7 +359,12 @@ const dg = s => S.d.set.digits === 'ar' ? String(s).replace(/\d/g, d => AR_DIG[d
 const num = (x, dec = 2) => (x < 0 ? '\u200E' : '') + dg((Math.round(x * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: dec}));
 const money = x => `<span class="m">${num(x)}</span> <small>${esc(S.d.set.cur)}</small>`;
 const sign = (t, x) => (t === 'inc' ? '+' : '−') + num(x);
-const catOf = id => S.d.cats.find(c => c.id === id) || INC_CATS.find(c => c.id === id) || {id, name: 'فئة محذوفة', icon: 'package', color: '#94a3b8'};
+const catOf = id => {
+  if (typeof id === 'string' && id.startsWith('g:')) { const g = GROUPS.find(x => x.id === id.slice(2)); if (g) return {id, name: g.name + ' (عام)', icon: g.icon, color: g.color, group: g.id, isGroup: true}; }
+  return S.d.cats.find(c => c.id === id) || INC_CATS.find(c => c.id === id) || {id, name: 'فئة محذوفة', icon: 'package', color: '#94a3b8'};
+};
+const nrm = x => String(x || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u0652]/g, '').trim();
+const hit = (name, q) => nrm(name).includes(nrm(q));
 const todayStr = () => ymd(new Date());
 const nowTime = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const fmtTime = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return dg(`${h % 12 || 12}:${pad(m)}`) + (h < 12 ? ' ص' : ' م'); };
@@ -505,7 +521,7 @@ function viewHome() {
 
 function viewLog() {
   const f = S.f, months = [...new Set(S.d.tx.map(t => t.date.slice(0, 7)))].sort().reverse();
-  let list = S.d.tx.filter(t => (!f.cat || t.cat === f.cat) && (!f.month || t.date.startsWith(f.month)) &&
+  let list = S.d.tx.filter(t => (!f.cat || t.cat === f.cat || (f.cat.startsWith('g:') && catOf(t.cat).group === f.cat.slice(2))) && (!f.month || t.date.startsWith(f.month)) &&
     (!f.q || (t.note + catOf(t.cat).name).includes(f.q)));
   list.sort(tcmp);
   const groups = {}; list.forEach(t => (groups[t.date] ||= []).push(t));
@@ -626,18 +642,22 @@ function catPickBtn(act, id, allLabel) {
   return `<button type="button" class="pick" data-act="${act}">${c ? chipIc(c) : `<span class="pi" style="background:var(--pri-soft);color:var(--pri)">${I('tags', 22)}</span>`}<b>${esc(c ? c.name : allLabel)}</b><span class="cv">${ic('chevron-down', 16)}</span></button>`;
 }
 function openCatPick(title, sel, withAll, incFirst, done) {
-  const item = c => `<button class="pki ${c.id === sel ? 'on' : ''}" data-act="pkset" data-id="${c.id}">${chipIc(c)}<b>${esc(c.name)}</b><span class="ck">${CK}</span></button>`;
+  const item = (c, cls) => `<button class="pki ${cls || ''} ${c.id === sel ? 'on' : ''}" data-act="pkset" data-id="${c.id}">${chipIc(c)}<b>${esc(c.name)}</b><span class="ck">${CK}</span></button>`;
   const gh = n => `<div class="pkg">${esc(n)}<i></i></div>`;
-  let h = withAll ? `<button class="pki all ${!sel ? 'on' : ''}" data-act="pkset" data-id=""><span class="pi">${I('tags', 22)}</span><b>كل الفئات</b><span class="ck">${CK}</span></button>` : '';
-  const inc = INC_CATS.length ? gh('الدخل') + INC_CATS.map(item).join('') : '';
-  if (incFirst) h += inc;
-  GROUPS.forEach(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (cs.length) h += gh(g.name) + cs.map(item).join(''); });
-  if (!incFirst) h += inc;
-  window.__pkDone = done;
-  $('#layer').insertAdjacentHTML('beforeend', `<div class="ov pk" id="pk" data-act="pkclose"><div class="sheet pks"><div class="sh"><b>${esc(title)}</b><button class="x" data-act="pkclose">✕</button></div><div class="pkl">${h}</div></div></div>`);
+  const build = q => {
+    let h = withAll && !q ? `<button class="pki all ${!sel ? 'on' : ''}" data-act="pkset" data-id=""><span class="pi">${I('tags', 22)}</span><b>كل الفئات</b><span class="ck">${CK}</span></button>` : '';
+    const inc = INC_CATS.filter(c => !q || hit(c.name, q)); const incH = inc.length ? gh('الدخل') + inc.map(c => item(c)).join('') : '';
+    if (incFirst) h += incH;
+    GROUPS.forEach(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return;
+      const gm = !q || hit(g.name, q), list = gm ? cs : cs.filter(c => hit(c.name, q));
+      if (list.length || gm) h += gh(g.name) + (gm ? item(catOf('g:' + g.id), 'gi') : '') + list.map(c => item(c)).join(''); });
+    if (!incFirst) h += incH;
+    return h || '<div class="empty" style="padding:24px 8px">لا توجد فئة بهذا الاسم</div>';
+  };
+  window.__pkDone = done; window.__pkBuild = build;
+  $('#layer').insertAdjacentHTML('beforeend', `<div class="ov pk" id="pk" data-act="pkclose"><div class="sheet pks"><div class="sh"><b>${esc(title)}</b><button class="x" data-act="pkclose">✕</button></div><div class="srch"><input type="search" id="pksearch" placeholder="ابحث عن فئة" autocomplete="off"></div><div class="pkl" id="pkl">${build('')}</div></div></div>`);
   const on = document.querySelector('#pk .pki.on'); if (on) on.scrollIntoView({block: 'center'});
 }
-
 
 let F = {}; // حالة نموذج الإضافة
 function calc(v) {
@@ -683,7 +703,7 @@ function paintForm() {
   $('#amtBox').className = 'amt ' + F.type;
   $('#srch').style.display = F.type === 'exp' ? '' : 'none';
   const all = F.type === 'exp' ? S.d.cats : INC_CATS;
-  if (!all.find(c => c.id === F.cat)) F.cat = all[0]?.id;
+  if (!all.find(c => c.id === F.cat) && !(F.type === 'exp' && String(F.cat).startsWith('g:'))) F.cat = all[0]?.id;
   paintCats();
   const t = todayStr(), y = ymd(new Date(Date.now() - 864e5));
   $('#dchips').innerHTML = `<button class="chip ${F.date === t ? 'on' : ''}" data-d="${t}">اليوم</button><button class="chip ${F.date === y ? 'on' : ''}" data-d="${y}">أمس</button>
@@ -693,18 +713,18 @@ function paintCats() {
   const btn = c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e" style="color:${c.color}">${I(c.icon, 26)}</span>${esc(c.name)}</button>`;
   let html;
   if (F.type !== 'exp') html = `<div class="cg">${INC_CATS.map(btn).join('')}</div>`;
-  else if (F.q.trim()) { const m = S.d.cats.filter(c => c.name.includes(F.q.trim()));
+  else if (F.q.trim()) { const q = F.q.trim(), m = [...GROUPS.filter(g => hit(g.name, q) && S.d.cats.some(c => (c.group || 'other') === g.id)).map(g => catOf('g:' + g.id)), ...S.d.cats.filter(c => hit(c.name, q))];
     html = m.length ? `<div class="cg">${m.map(btn).join('')}</div>` : '<div class="hint2">لا توجد فئة بهذا الاسم</div>'; }
   else {
     const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1);
     const top = S.d.cats.filter(c => cnt[c.id] > 0).sort((a, b) => cnt[b.id] - cnt[a.id]).map(c => c.id);
     const base = top.length ? top : ['food', 'groc', 'trans', 'bills', 'shop', 'fam'];
-    const quick = [...new Set([F.cat, ...base])].filter(Boolean).slice(0, 8).map(id => S.d.cats.find(c => c.id === id)).filter(Boolean);
+    const quick = [...new Set([F.cat, ...base])].filter(Boolean).slice(0, 8).map(id => String(id).startsWith('g:') ? catOf(id) : S.d.cats.find(c => c.id === id)).filter(Boolean);
     html = `<div class="gh">${ic('star', 14)} ${top.length ? 'الأكثر استخداماً' : 'مقترحة'}</div><div class="cg">${quick.map(btn).join('')}</div>
       <button class="link allbtn" data-act="catsall">${F.all ? 'إخفاء الأقسام' : 'كل الفئات حسب القسم'} ${ic('chevron-down', 14)}</button>`;
     if (F.all) html += GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return '';
       const open = F.open[g.id] ?? cs.some(c => c.id === F.cat);
-      return `<button class="gh gbtn" data-g="${g.id}">${I(g.icon, 15)} ${g.name} <span class="cnt">${dg(cs.length)}</span><span class="chev ${open ? 'up' : ''}">${ic('chevron-down', 15)}</span></button>${open ? `<div class="cg">${cs.map(btn).join('')}</div>` : ''}`; }).join('');
+      return `<button class="gh gbtn" data-g="${g.id}">${I(g.icon, 15)} ${g.name} <span class="cnt">${dg(cs.length)}</span><span class="chev ${open ? 'up' : ''}">${ic('chevron-down', 15)}</span></button>${open ? `<div class="cg">${[catOf('g:' + g.id), ...cs].map(btn).join('')}</div>` : ''}`; }).join('');
   }
   $('#cg').innerHTML = html;
 }
@@ -728,9 +748,15 @@ function promptSheet(title, label, value, onOk, type = 'text') {
     <div class="btns"><button class="btn p" id="pok">حفظ</button></div>`);
   $('#pok').onclick = () => { onOk($('#pv').value); }; setTimeout(() => $('#pv').focus(), 100);
 }
+function catsList(q) {
+  const out = GROUPS.map(g => { const all = S.d.cats.filter(c => (c.group || 'other') === g.id); const gm = !q || hit(g.name, q), cs = gm ? all : all.filter(c => hit(c.name, q));
+    return cs.length ? `<div class="gh">${I(g.icon)} ${g.name}</div><div class="card set">${cs.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e" style="color:${c.color}">${I(c.icon, 22)}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>` : ''; }).join('');
+  return out || '<div class="empty" style="padding:24px 8px">لا توجد فئة بهذا الاسم</div>';
+}
 function catsSheet() {
   sheet(`<div class="sh"><b>إدارة الفئات</b><button class="x" data-act="close">✕</button></div>
-    ${GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); return cs.length ? `<div class="gh">${I(g.icon)} ${g.name}</div><div class="card set">${cs.map(c => `<button class="r" data-act="catedit" data-id="${c.id}"><span class="e">${I(c.icon)}</span><b>${esc(c.name)}</b><span>${c.budget ? 'ميزانية ' + num(c.budget, 0) : ''}</span></button>`).join('')}</div>` : ''; }).join('')}
+    <div class="srch"><input type="search" id="cqsearch" placeholder="ابحث في الفئات" autocomplete="off"></div>
+    <div id="cql">${catsList('')}</div>
     <div class="btns"><button class="btn p" data-act="catnew">+ فئة جديدة</button></div>`);
 }
 function catForm(id) {
@@ -880,6 +906,8 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'csearch') { F.q = e.target.value; paintCats(); return; }
+  if (e.target.id === 'cqsearch') { $('#cql').innerHTML = catsList(e.target.value.trim()); return; }
+  if (e.target.id === 'pksearch') { $('#pkl').innerHTML = window.__pkBuild(e.target.value.trim()); return; }
   if (e.target.id === 'q') { S.f.q = e.target.value; const p = e.target.selectionStart; render(); const q = $('#q'); q.focus(); q.setSelectionRange(p, p); }
 });
 document.addEventListener('change', e => {
