@@ -52,6 +52,21 @@ final class SmsClassifier {
             if (got.equals(m.group(1))) ok++;
             else { bad++; System.out.println("FAIL expected=" + m.group(1) + " got=" + got + "\n  " + m.group(2).replace("\n", " | ")); }
         }
+        if (a.length > 1) {   // اختبار المبلغ والتاجر: java SmsClassifier corpus.txt parse.txt
+            String pt = new String(Files.readAllBytes(Paths.get(a[1])), StandardCharsets.UTF_8);
+            Matcher pm = Pattern.compile("#parse ([^\\n]*)\\n([\\s\\S]*?)\\n#end").matcher(pt);
+            while (pm.find()) {
+                SmsPreview p = SmsPreview.of(pm.group(2));
+                String exp = pm.group(1);
+                for (String kv : exp.split("\\|")) {
+                    int i = kv.indexOf('='); String key = kv.substring(0, i), val = kv.substring(i + 1);
+                    String got = key.equals("amount") ? p.amount : key.equals("merchant") ? p.merchant : null;
+                    if (got == null && !key.equals("amount") && !key.equals("merchant")) continue;
+                    boolean same = key.equals("amount") && got != null ? Double.parseDouble(got) == Double.parseDouble(val) : val.equals(got);
+                    if (same) ok++; else { bad++; System.out.println("FAIL " + key + " expected=" + val + " got=" + got + "\n  " + pm.group(2).split("\\n")[0]); }
+                }
+            }
+        }
         System.out.println("Java: " + ok + " passed, " + bad + " failed");
         System.exit(bad == 0 ? 0 : 1);
     }

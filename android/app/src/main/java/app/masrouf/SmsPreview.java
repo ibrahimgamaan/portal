@@ -1,5 +1,7 @@
 package app.masrouf;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +14,9 @@ final class SmsPreview {
         Pattern.compile("(?:مبلغ|بمبلغ|amount|amt|value)\\s*:?\\s*" + CUR + "?\\s*" + NUM, Pattern.CASE_INSENSITIVE),
         Pattern.compile(CUR + "\\s*:?\\s*" + NUM, Pattern.CASE_INSENSITIVE),
         Pattern.compile(NUM + "\\s*" + CUR, Pattern.CASE_INSENSITIVE)};
+    private static final Pattern FEE = Pattern.compile("(?:الرسوم|رسوم(?:\\s*(?:التحويل|الخدمة|الحوالة))?|العمولة|عمولة|fees?|commission|charges?)\\s*:?\\s*" + CUR + "?\\s*" + NUM, Pattern.CASE_INSENSITIVE);
+    private static final Pattern TOTAL = Pattern.compile("(?:الإجمالي|الاجمالي|المجموع|الإجمالى|total(?:\\s*amount)?)\\s*:?\\s*" + CUR + "?\\s*" + NUM, Pattern.CASE_INSENSITIVE);
+    private static final Pattern MER_FIRST = Pattern.compile("(?:المستفيد|اسم\\s*المستفيد|beneficiary|لدى|عند|التاجر|\\bmerchant\\b|\\bat\\b|\\bto\\b|\\bbiller\\b|الجهة)\\s*:?\\s*([^\\n]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern MER = Pattern.compile("(?:لدى|عند|\\bat\\b|\\bto\\b|\\bfrom\\b|الى|إلى)\\s*:?\\s*([^\\n]+)", Pattern.CASE_INSENSITIVE);
 
     final String amount, merchant;
@@ -26,13 +31,29 @@ final class SmsPreview {
         return BAL.matcher(n).replaceAll(" ");
     }
 
+    private static String findBase(String main) {
+        for (Pattern p : AMT) { Matcher m = p.matcher(main); if (m.find()) { String v = m.group(1).replace(",", ""); if (Double.parseDouble(v) > 0) return v; } }
+        return null;
+    }
+
+    /** نفس منطق money في sms-parser.js: الإجمالي إن وُجد، وإلا المبلغ + الرسوم. */
     static SmsPreview of(String body) {
         String main = mainText(body);
-        String amount = null;
-        for (Pattern p : AMT) { Matcher m = p.matcher(main); if (m.find()) { String v = m.group(1).replace(",", ""); if (Double.parseDouble(v) > 0) { amount = v; break; } } }
+        Matcher tm = TOTAL.matcher(main), fm = FEE.matcher(main);
+        String total = tm.find() ? tm.group(1).replace(",", "") : null;
+        String fee = fm.find() ? fm.group(1).replace(",", "") : null;
+        String rest = FEE.matcher(TOTAL.matcher(main).replaceAll(" ")).replaceAll(" ");
+        String base = findBase(rest), amount = null;
+        if (total != null && Double.parseDouble(total) > 0) amount = total;
+        else if (base != null) {
+            BigDecimal s = new BigDecimal(base);
+            if (fee != null && Double.parseDouble(fee) > 0) s = s.add(new BigDecimal(fee)).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
+            amount = s.toPlainString();
+        }
         String merchant = null;
-        Matcher mm = MER.matcher(main);
-        if (mm.find()) { merchant = mm.group(1).trim(); if (merchant.length() > 40) merchant = merchant.substring(0, 40); }
+        Matcher mm = MER_FIRST.matcher(main);
+        if (!mm.find()) { mm = MER.matcher(main); if (!mm.find()) mm = null; }
+        if (mm != null) { merchant = mm.group(1).trim(); if (merchant.length() > 40) merchant = merchant.substring(0, 40); }
         return new SmsPreview(amount, merchant);
     }
 

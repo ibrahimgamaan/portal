@@ -1,0 +1,72 @@
+#parse amount=1513.8|merchant=Ali Yahya Mohsen Gamaan|date=2026-11-23|time=18:59|cat=parentm|ts=2026-11-23T19:00:00
+حوالة صادرة دولية
+الإنماء أكسبرس
+المبلغ المحول: 1,500 SAR
+الرسوم: 13.80 SAR
+من: إبراهيم
+من حساب: *9000
+المستفيد: Ali Yahya Mohsen Gamaan
+الى بنك: Tadhamon Islamic Bank
+الدولة: اليمن
+في: 26-11-23 18:59
+الرقم المرجعي: 20115263276HCKB
+#end
+#parse amount=1513.8|merchant=Ali Yahya Mohsen Gamaan|date=2026-11-23|time=18:59|ts=2026-11-23T19:00:00
+International outgoing transfer
+Transfer amount: 1,500.00 SAR
+Fees: 13.80 SAR
+Beneficiary: Ali Yahya Mohsen Gamaan
+On: 2026-11-23 18:59
+#end
+#parse amount=1513.8|merchant=Ali|ts=2026-11-23T19:00:00
+حوالة صادرة
+الرسوم: 13.80 SAR
+المبلغ: 1,500 SAR
+المستفيد: Ali
+#end
+#parse amount=1500|merchant=Ahmed|ts=2026-11-23T19:00:00
+حوالة صادرة محلية
+المبلغ: 1,500 SAR
+الرسوم: 0 SAR
+الى: Ahmed
+#end
+#parse amount=1200|merchant=Ahmed Ali|ts=2026-11-23T19:00:00
+Outgoing Transfer
+Amount: SAR 1,200.00
+To: Ahmed Ali
+On: 2026-11-15 12:00:00
+#end
+#parse amount=1513.8|ts=2026-11-23T19:00:00
+حوالة صادرة
+المبلغ المحول: 1,500 SAR
+الإجمالي: 1,513.80 SAR
+#end
+#parse amount=21|merchant=Shawerma House|date=2026-11-13|time=17:39|cat=food|ts=2026-11-16T10:00:00
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 21.00
+At: Shawerma House
+In SAUDI ARABIA
+Remaining limit SAR: 14,829.18
+On: 2026-11-13 17:39:35
+#end
+#parse amount=10.6|merchant=FOLWAT ALBAHRAIN CO|date=2026-11-14|time=18:35|cat=groc|ts=2026-11-16T10:00:00
+POS Purchase (Contactless)
+By: XX7483;Visa Credit
+Amount: SAR 10.60
+At: FOLWAT ALBAHRAIN CO
+In SAUDI ARABIA
+Remaining limit SAR: 14,414.61
+On: 2026-11-14 18:35:13
+#end
+#parse amount=45.5|merchant=بنده|ts=2026-11-16T10:00:00
+شراء بمبلغ ٤٥٫٥ ريال لدى بنده
+الرصيد 3,200 ريال
+#end
+#parse amount=300|date=2026-11-15|ts=2026-11-16T10:00:00
+سحب نقدي
+مبلغ: 300.00 SAR
+من: ATM الراجحي
+في 15/11/2026 10:22
+الرصيد: 1,000 SAR
+#end

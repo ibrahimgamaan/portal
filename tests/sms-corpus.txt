@@ -173,3 +173,23 @@ Your statement is ready. Please log in to view it.
 #expect maybe
 Amount: SAR 300.00 pending approval
 #end
+#expect txn
+حوالة صادرة دولية
+الإنماء أكسبرس
+المبلغ المحول: 1,500 SAR
+الرسوم: 13.80 SAR
+من: إبراهيم
+من حساب: *9000
+المستفيد: Ali Yahya Mohsen Gamaan
+الى بنك: Tadhamon Islamic Bank
+الدولة: اليمن
+في: 26-11-23 18:59
+الرقم المرجعي: 20115263276HCKB
+#end
+#expect txn
+International outgoing transfer
+Transfer amount: 1,500.00 SAR
+Fees: 13.80 SAR
+Beneficiary: Ali Yahya Mohsen Gamaan
+On: 2026-11-23 18:59
+#end

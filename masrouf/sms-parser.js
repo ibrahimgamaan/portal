@@ -50,19 +50,28 @@
   const guessCat = m => { const l = String(m || '').toLowerCase(); for (const [k, c] of KNOWN) if (l.includes(k)) return c; return guessRule(m); };
   const guessRule = m => { for (const [id, re] of CATS) if (re.test(m || '')) return id; return 'other'; };
 
+  const two = x => String(x).padStart(2, '0');
   function parseDate(t, fallbackTs) {
-    const d = t.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/) || null;
+    const ref = new Date(fallbackTs || Date.now());
+    const d = t.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
     let y, m, dd;
     if (d) { y = +d[1]; m = +d[2]; dd = +d[3]; }
     else {
-      const e = t.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
-      if (e) { dd = +e[1]; m = +e[2]; y = +e[3]; if (y < 100) y += 2000; }
+      const e = t.match(/(?<![\d\/-])(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})(?![\d])/);
+      if (e) {
+        const a1 = +e[1], b1 = +e[2], c1 = +e[3];
+        if (c1 >= 100) { dd = a1; m = b1; y = c1; }
+        else {
+          // 26-11-23 قد تكون يوم-شهر-سنة أو سنة-شهر-يوم؛ نختار الأقرب لوقت وصول الرسالة
+          const cands = [[2000 + c1, b1, a1], [2000 + a1, b1, c1]].filter(([yy, mm, d2]) => mm >= 1 && mm <= 12 && d2 >= 1 && d2 <= 31);
+          cands.sort((p, q2) => Math.abs(new Date(p[0], p[1] - 1, p[2]) - ref) - Math.abs(new Date(q2[0], q2[1] - 1, q2[2]) - ref));
+          if (cands.length) [y, m, dd] = cands[0];
+        }
+      }
     }
-    if (y && m >= 1 && m <= 12 && dd >= 1 && dd <= 31) return `${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
-    const f = new Date(fallbackTs || Date.now());
-    return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+    if (y && m >= 1 && m <= 12 && dd >= 1 && dd <= 31) return `${y}-${two(m)}-${two(dd)}`;
+    return `${ref.getFullYear()}-${two(ref.getMonth() + 1)}-${two(ref.getDate())}`;
   }
-
   function parseTime(t, ts) {
     const m = t.match(/(?:^|[\s:T])(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?|ص|م)?/);
     if (m) { let h = +m[1]; const mi = +m[2], ap = (m[3] || '').toLowerCase();
@@ -92,17 +101,40 @@
     if (strong) return promo ? 'maybe' : 'txn';
     return WEAK.test(main) ? 'maybe' : 'ignore';
   }
+  const FEE = new RegExp('(?:الرسوم|رسوم(?:\\s*(?:التحويل|الخدمة|الحوالة))?|العمولة|عمولة|fees?|commission|charges?)\\s*:?\\s*' + CUR + '?\\s*' + NUM, 'i');
+  const TOTAL = new RegExp('(?:الإجمالي|الاجمالي|المجموع|الإجمالى|total(?:\\s*amount)?)\\s*:?\\s*' + CUR + '?\\s*' + NUM, 'i');
+  const num2 = s => parseFloat(String(s).replace(/,/g, ''));
+  /* المبلغ الكلي: إن وُجد إجمالي نأخذه، وإلا المبلغ + الرسوم (مثل الحوالات الدولية) */
+  function money(main) {
+    const tm = main.match(TOTAL), fm = main.match(FEE);
+    const rest = main.replace(TOTAL, ' ').replace(FEE, ' ');
+    const base = findAmount(rest), fee = fm ? num2(fm[1]) : 0;
+    if (tm && num2(tm[1]) > 0) return {amount: num2(tm[1]), base: base || 0, fee: 0};
+    if (!(base > 0)) return {amount: 0, base: 0, fee: 0};
+    return {amount: Math.round((base + (fee > 0 ? fee : 0)) * 100) / 100, base, fee: fee > 0 ? fee : 0};
+  }
+  /* التاجر/المستفيد: نفضّل الحقول الدالة (المستفيد، لدى، At) على "من" لأن "من: اسمك" هو المرسل نفسه */
+  const MER_FIRST = /(?:المستفيد|اسم\s*المستفيد|beneficiary|لدى|عند|التاجر|\bmerchant\b|\bat\b|\bto\b|\bbiller\b|الجهة)\s*:?\s*([^\n]+)/i;
+  const MER_LAST = /(?:\bfrom\b|الى|إلى|(?<=^|\s)من(?!\s*حساب))\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i;
+  function findMerchant(main) {
+    const m = main.match(MER_FIRST) || main.match(MER_LAST);
+    if (!m) return '';
+    return m[1].replace(/[*:]+$/g, '').replace(/^[\s:*-]+|[\s:*-]+$/g, '').replace(/\s*(?:في\s*\d.*|بتاريخ.*|on\s.*)$/i, '').slice(0, 40);
+  }
   /* استخراج الحقول دون حكم على الرسالة (يُستعمل بعد التصنيف) */
   function parseLoose(body, ts) {
     const t = norm(body), main = t.replace(BAL, ' ');
     let type = 'exp';
     const e = main.search(EXP), i = main.search(INC);
     if (i >= 0 && (e < 0 || i < e)) type = 'inc';
-    const amount = findAmount(main); if (!(amount > 0)) return null;
-    let merchant = '';
-    const mm = main.match(/(?:لدى|عند|من\s*متجر|التاجر|\bmerchant\b|\bat\b|\bto\b|\bfrom\b|\bbiller\b|المستفيد|الجهة|الى|إلى|(?<=^|\s)من)\s*:?\s*([^\n]+?)(?=\s*(?:في\s*\d|بتاريخ|التاريخ|on\s|date|\d{1,2}[\/-]\d{1,2}|بطاقة|card|مدى|mada|رصيد|\n|$))/i);
-    if (mm) merchant = mm[1].replace(/[*:]+$/g, '').replace(/^[\s:*-]+|[\s:*-]+$/g, '').slice(0, 40);
-    return {type, amount, merchant, date: parseDate(t, ts), time: parseTime(t, ts), cat: type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main)};
+    const mo = money(main); if (!(mo.amount > 0)) return null;
+    const merchant = findMerchant(main);
+    let cat = type === 'inc' ? (/(راتب|salary)/i.test(main) ? 'salary' : 'extra') : guessCat(merchant + ' ' + main);
+    // حوالة دولية صادرة: غالباً مصروف الأهل الشهري، ويتعلم التطبيق غيره عند تعديلك
+    if (type === 'exp' && /(حوالة\s*صادرة\s*دولية|international\s*(?:outgoing\s*)?transfer|outgoing\s*international)/i.test(main)) cat = 'parentm';
+    const fmt = x => (Math.round(x * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+    const detail = mo.fee > 0 && mo.base > 0 ? `تحويل ${fmt(mo.base)} + رسوم ${fmt(mo.fee)}` : '';
+    return {type, amount: mo.amount, merchant, detail, date: parseDate(t, ts), time: parseTime(t, ts), cat};
   }
   function parseSms(body, ts) { return classify(body) === 'txn' ? parseLoose(body, ts) : null; }
   const api = {parseSms, parseLoose, classify, guessCat};
