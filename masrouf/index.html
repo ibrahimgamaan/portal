@@ -195,6 +195,13 @@ details.card summary::-webkit-details-marker{display:none}
 .pend .tx .t span{white-space:normal}
 .pki.gi{background:var(--pri-soft)}.pki.gi b{font-weight:700;color:var(--pri)}
 .pks .srch{margin:0 0 8px}
+.crumb{display:flex;align-items:center;gap:12px;width:100%;text-align:start;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);border:2px solid var(--pri)}
+.crumb .ci{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+.crumb b{display:block;font-size:16px}.crumb small{color:var(--mute);font-size:12.5px}
+.crumb .go{margin-inline-start:auto;color:var(--pri);font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px;flex:none}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:99px;background:var(--card);font-size:13.5px;font-weight:600;box-shadow:var(--shadow);border:2px solid transparent}
+.pill.on{border-color:var(--pri);color:var(--pri)}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -596,7 +603,7 @@ function viewMore() {
     ${row('trash-2', 'مسح كل البيانات', '', 'wipe')}</section>
     <section class="card set"><h3>التطبيق</h3>
     ${window.__pwa ? row('smartphone', 'ثبّت التطبيق على الشاشة الرئيسية', '', 'install') : ''}
-    <div class="hint" style="padding:6px 4px;line-height:1.9">بياناتك محفوظة على جوالك فقط ولا تُرسل لأي جهة. خذ نسخة احتياطية من وقت لآخر، فمسح بيانات المتصفح يحذفها.<br>عدد العمليات المسجّلة ${dg(S.d.tx.length)}</div></section>`;
+    <div class="hint" style="padding:6px 4px;line-height:1.9">بياناتك محفوظة على جوالك فقط ولا تُرسل لأي جهة. خذ نسخة احتياطية من وقت لآخر، فمسح بيانات المتصفح يحذفها.<br>عدد العمليات المسجّلة ${dg(S.d.tx.length)}${appVer() ? '<br>إصدار التطبيق ' + dg(appVer()) : ''}</div></section>`;
 }
 
 function countUp(el) {
@@ -605,8 +612,9 @@ function countUp(el) {
   requestAnimationFrame(step);
 }
 let OB = 0;
+function appVer() { try { return window.AndroidBridge && AndroidBridge.appVersion ? AndroidBridge.appVersion() : ''; } catch (e) { return ''; } }
 function readerState() { try { return window.AndroidBridge && AndroidBridge.readerState ? AndroidBridge.readerState() : null; } catch (e) { return null; } }
-const READER_URL = 'https://github.com/ibrahimgamaan/portal/raw/claude/expense-tracker-app-t8vce0/masrouf-reader.apk';
+const READER_URL = 'https://github.com/ibrahimgamaan/portal/raw/claude/expense-tracker-app-t8vce0/releases/Masrouf-Reader-1.0.apk';
 function askSmsOnce() {
   if (window.AndroidBridge && AndroidBridge.requestNotifications && !AndroidBridge.hasNotifications()) AndroidBridge.requestNotifications();
   if (readerState() === 'missing') setTimeout(readerHelp, 600);
@@ -641,14 +649,14 @@ function catPickBtn(act, id, allLabel) {
   const c = id ? catOf(id) : null;
   return `<button type="button" class="pick" data-act="${act}">${c ? chipIc(c) : `<span class="pi" style="background:var(--pri-soft);color:var(--pri)">${I('tags', 22)}</span>`}<b>${esc(c ? c.name : allLabel)}</b><span class="cv">${ic('chevron-down', 16)}</span></button>`;
 }
-function openCatPick(title, sel, withAll, incFirst, done) {
+function openCatPick(title, sel, withAll, incFirst, done, only) {
   const item = (c, cls) => `<button class="pki ${cls || ''} ${c.id === sel ? 'on' : ''}" data-act="pkset" data-id="${c.id}">${chipIc(c)}<b>${esc(c.name)}</b><span class="ck">${CK}</span></button>`;
   const gh = n => `<div class="pkg">${esc(n)}<i></i></div>`;
   const build = q => {
     let h = withAll && !q ? `<button class="pki all ${!sel ? 'on' : ''}" data-act="pkset" data-id=""><span class="pi">${I('tags', 22)}</span><b>كل الفئات</b><span class="ck">${CK}</span></button>` : '';
-    const inc = INC_CATS.filter(c => !q || hit(c.name, q)); const incH = inc.length ? gh('الدخل') + inc.map(c => item(c)).join('') : '';
+    const inc = only === 'exp' ? [] : INC_CATS.filter(c => !q || hit(c.name, q)); const incH = inc.length ? gh('الدخل') + inc.map(c => item(c)).join('') : '';
     if (incFirst) h += incH;
-    GROUPS.forEach(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return;
+    if (only !== 'inc') GROUPS.forEach(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return;
       const gm = !q || hit(g.name, q), list = gm ? cs : cs.filter(c => hit(c.name, q));
       if (list.length || gm) h += gh(g.name) + (gm ? item(catOf('g:' + g.id), 'gi') : '') + list.map(c => item(c)).join(''); });
     if (!incFirst) h += incH;
@@ -683,14 +691,13 @@ function openForm(id, pre) {
   let t = id ? S.d.tx.find(x => x.id === id) : null;
   if (pre) t = null;
   const src = t || pre;
-  F = {id, pid: pre?.id, merchant: pre?.merchant, type: src?.type || 'exp', cat: src?.cat || null, date: src?.date || todayStr(), time: src ? (src.time || '') : nowTime(), q: '', all: false, open: {}};
+  F = {id, pid: pre?.id, merchant: pre?.merchant, type: src?.type || 'exp', cat: src?.cat || null, date: src?.date || todayStr(), time: src ? (src.time || '') : nowTime(), };
   const keys = ['7', '8', '9', 'bk', '4', '5', '6', '+', '1', '2', '3', '−', '.', '0', '×', '='];
   sheet(`<div class="sh"><b>${t ? 'تعديل العملية' : 'إضافة عملية'}</b><button class="x" data-act="close">✕</button></div>
     <div class="seg" id="tseg"><button data-type="exp">مصروف</button><button data-type="inc">دخل</button></div>
     <div class="amt" id="amtBox"><input id="amt" readonly inputmode="none" autocomplete="off" placeholder="0" value="${src ? src.amount : ''}"><span>${esc(S.d.set.cur)}</span></div>
     <div class="hint2" id="amtHint"></div>
     <div class="kp">${keys.map(k => `<button data-k="${k}" class="${'+−×='.includes(k) ? 'op' : k === 'bk' ? 'bk' : ''}">${k === 'bk' ? ic('delete', 22) : k}</button>`).join('')}</div>
-    <div class="srch" id="srch"><input type="search" id="csearch" placeholder="ابحث عن فئة" autocomplete="off"></div>
     <div id="cg"></div>
     <div class="fld" id="dchips"></div>
     <div class="fld"><input type="text" id="note" list="notes" placeholder="ملاحظة (اختياري) مثل: غداء مع الأصدقاء" value="${esc(src?.note ?? src?.merchant ?? '')}" maxlength="120">
@@ -701,7 +708,6 @@ function openForm(id, pre) {
 function paintForm() {
   document.querySelectorAll('#tseg button').forEach(b => b.classList.toggle('on', b.dataset.type === F.type));
   $('#amtBox').className = 'amt ' + F.type;
-  $('#srch').style.display = F.type === 'exp' ? '' : 'none';
   const all = F.type === 'exp' ? S.d.cats : INC_CATS;
   if (!all.find(c => c.id === F.cat) && !(F.type === 'exp' && String(F.cat).startsWith('g:'))) F.cat = all[0]?.id;
   paintCats();
@@ -710,23 +716,20 @@ function paintForm() {
     <input type="date" id="date" value="${F.date}" max="${t}" style="flex:1;min-width:140px"><input type="time" id="time" value="${F.time || ''}" style="width:118px">`;
 }
 function paintCats() {
-  const btn = c => `<button data-cat="${c.id}" class="${c.id === F.cat ? 'on' : ''}"><span class="e" style="color:${c.color}">${I(c.icon, 26)}</span>${esc(c.name)}</button>`;
-  let html;
-  if (F.type !== 'exp') html = `<div class="cg">${INC_CATS.map(btn).join('')}</div>`;
-  else if (F.q.trim()) { const q = F.q.trim(), m = [...GROUPS.filter(g => hit(g.name, q) && S.d.cats.some(c => (c.group || 'other') === g.id)).map(g => catOf('g:' + g.id)), ...S.d.cats.filter(c => hit(c.name, q))];
-    html = m.length ? `<div class="cg">${m.map(btn).join('')}</div>` : '<div class="hint2">لا توجد فئة بهذا الاسم</div>'; }
+  const c = catOf(F.cat), grp = GROUPS.find(g => g.id === c.group);
+  const sub = F.type === 'inc' ? 'دخل' : c.isGroup ? 'قسم رئيسي' : (grp ? grp.name : '');
+  const pill = x => `<button type="button" class="pill ${x.id === F.cat ? 'on' : ''}" data-cat="${x.id}"><span style="color:${x.color};display:grid">${I(x.icon, 16)}</span>${esc(x.name)}</button>`;
+  let quick, label;
+  if (F.type === 'inc') { quick = INC_CATS; label = 'فئات الدخل'; }
   else {
-    const cnt = {}; S.d.tx.forEach(t => cnt[t.cat] = (cnt[t.cat] || 0) + 1);
-    const top = S.d.cats.filter(c => cnt[c.id] > 0).sort((a, b) => cnt[b.id] - cnt[a.id]).map(c => c.id);
+    const cnt = {}; S.d.tx.forEach(t => { if (t.type === 'exp') cnt[t.cat] = (cnt[t.cat] || 0) + 1; });
+    const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
     const base = top.length ? top : ['food', 'groc', 'trans', 'bills', 'shop', 'fam'];
-    const quick = [...new Set([F.cat, ...base])].filter(Boolean).slice(0, 8).map(id => String(id).startsWith('g:') ? catOf(id) : S.d.cats.find(c => c.id === id)).filter(Boolean);
-    html = `<div class="gh">${ic('star', 14)} ${top.length ? 'الأكثر استخداماً' : 'مقترحة'}</div><div class="cg">${quick.map(btn).join('')}</div>
-      <button class="link allbtn" data-act="catsall">${F.all ? 'إخفاء الأقسام' : 'كل الفئات حسب القسم'} ${ic('chevron-down', 14)}</button>`;
-    if (F.all) html += GROUPS.map(g => { const cs = S.d.cats.filter(c => (c.group || 'other') === g.id); if (!cs.length) return '';
-      const open = F.open[g.id] ?? cs.some(c => c.id === F.cat);
-      return `<button class="gh gbtn" data-g="${g.id}">${I(g.icon, 15)} ${g.name} <span class="cnt">${dg(cs.length)}</span><span class="chev ${open ? 'up' : ''}">${ic('chevron-down', 15)}</span></button>${open ? `<div class="cg">${[catOf('g:' + g.id), ...cs].map(btn).join('')}</div>` : ''}`; }).join('');
+    quick = [...new Set([F.cat, ...base])].filter(Boolean).slice(0, 8).map(id => catOf(id)).filter(x => !x.name.startsWith('فئة محذوفة'));
+    label = top.length ? 'الأكثر استخداماً' : 'مقترحة';
   }
-  $('#cg').innerHTML = html;
+  $('#cg').innerHTML = `<button type="button" class="crumb" data-act="formpick"><span class="ci" style="background:${c.color}22;color:${c.color}">${I(c.icon, 26)}</span><div><b>${esc(c.name)}</b><small>${esc(sub)}</small></div><span class="go">تغيير ${ic('chevron-down', 16)}</span></button>
+    <div class="gh" style="margin-top:12px">${ic('star', 14)} ${label}</div><div class="pills">${quick.map(pill).join('')}</div>`;
 }
 function saveForm(more) {
   const amt = calc($('#amt').value);
@@ -819,12 +822,11 @@ const stamp = () => todayStr();
 /* ============ الأحداث ============ */
 document.addEventListener('click', e => {
   if (S.swipeT && Date.now() - S.swipeT < 400) return;
-  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by],[data-k],[data-g],[data-tip]'); if (!el) return;
+  const el = e.target.closest('[data-act],[data-tab],[data-mode],[data-shift],[data-type],[data-cat],[data-d],[data-icon],[data-color],[data-by],[data-k],[data-tip]'); if (!el) return;
   const D = el.dataset;
   if (D.tab) { S.tab = D.tab; S.enter = true; render(); scrollTo(0, 0); return; }
   if (D.k) { kp(D.k); return; }
   if (D.tip) { const tl = $('#tipline'); if (tl) tl.textContent = D.tip; document.querySelectorAll('.bars .c').forEach(c => c.classList.toggle('sel', c === el)); return; }
-  if (D.g) { F.open[D.g] = !(F.open[D.g] ?? S.d.cats.some(c => (c.group || 'other') === D.g && c.id === F.cat)); paintCats(); return; }
   if (D.by) { S.rep.by = D.by; render(); return; }
   if (D.mode) { S.rep.mode = D.mode; render(); return; }
   if (D.shift) { S.rep.ref = shift(S.rep.mode, S.rep.ref, +D.shift); render(); return; }
@@ -839,7 +841,7 @@ document.addEventListener('click', e => {
     case 'add': openForm(); break;
     case 'onext': if (OB < 2) { OB++; onboard(); } else { set.onboarded = true; save(); closeSheet(); askSmsOnce(); } break;
     case 'oskip': set.onboarded = true; save(); closeSheet(); askSmsOnce(); break;
-    case 'catsall': F.all = !F.all; paintCats(); break;
+    case 'formpick': openCatPick(F.type === 'inc' ? 'اختر فئة الدخل' : 'اختر الفئة', F.cat, false, false, id => { F.cat = id; paintCats(); }, F.type); break;
     case 'edit': openForm(D.id); break;
     case 'save': saveForm(false); break;
     case 'saveMore': saveForm(true); break;
@@ -905,7 +907,6 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('input', e => {
-  if (e.target.id === 'csearch') { F.q = e.target.value; paintCats(); return; }
   if (e.target.id === 'cqsearch') { $('#cql').innerHTML = catsList(e.target.value.trim()); return; }
   if (e.target.id === 'pksearch') { $('#pkl').innerHTML = window.__pkBuild(e.target.value.trim()); return; }
   if (e.target.id === 'q') { S.f.q = e.target.value; const p = e.target.selectionStart; render(); const q = $('#q'); q.focus(); q.setSelectionRange(p, p); }

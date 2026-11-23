@@ -131,6 +131,9 @@ public class MainActivity extends Activity {
                 startActivity(Intent.createChooser(s, "مشاركة الملخص"));
             } catch (Exception e) { toast("تعذّرت المشاركة"); }
         }
+        @JavascriptInterface public String appVersion() {
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception e) { return ""; }
+        }
         @JavascriptInterface public String readerState() {
             boolean installed;
             try { getPackageManager().getPackageInfo(ReaderReceiver.READER_PKG, 0); installed = true; } catch (Exception ex) { installed = false; }
