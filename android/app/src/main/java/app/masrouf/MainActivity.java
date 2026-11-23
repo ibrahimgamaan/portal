@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
         if (i == null || !Intent.ACTION_SEND.equals(i.getAction())) return;
         String t = i.getStringExtra(Intent.EXTRA_TEXT);
         if (t == null || t.trim().isEmpty()) return;
-        try { SmsReceiver.push(this, "مشاركة", t, System.currentTimeMillis(), SmsClassifier.of(t)); } catch (Exception e) { return; }
+        try { SmsIntake.push(this, "مشاركة", t, System.currentTimeMillis(), SmsClassifier.of(t)); } catch (Exception e) { return; }
         i.setAction(null);
         wv.postDelayed(() -> wv.evaluateJavascript("window.smsStatusChanged&&smsStatusChanged()", null), 700);
     }
@@ -131,21 +131,29 @@ public class MainActivity extends Activity {
                 startActivity(Intent.createChooser(s, "مشاركة الملخص"));
             } catch (Exception e) { toast("تعذّرت المشاركة"); }
         }
-        @JavascriptInterface public boolean smsSupported() {
-            try { String[] p = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS).requestedPermissions;
-                if (p != null) for (String x : p) if (Manifest.permission.RECEIVE_SMS.equals(x)) return true; } catch (Exception e) {}
-            return false;
+        @JavascriptInterface public String readerState() {
+            boolean installed;
+            try { getPackageManager().getPackageInfo(ReaderReceiver.READER_PKG, 0); installed = true; } catch (Exception ex) { installed = false; }
+            if (!installed) return "missing";
+            return getSharedPreferences(SmsIntake.PREFS, MODE_PRIVATE).getBoolean("granted", false) ? "active" : "installed";
         }
-        @JavascriptInterface public boolean hasSms() {
-            return checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
+        @JavascriptInterface public boolean openReader() {
+            Intent i = getPackageManager().getLaunchIntentForPackage(ReaderReceiver.READER_PKG);
+            if (i == null) return false;
+            runOnUiThread(() -> startActivity(i));
+            return true;
         }
-        @JavascriptInterface public void requestSms() {
-            runOnUiThread(() -> {
-                if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.POST_NOTIFICATIONS}, 2);
-                else requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, 2);
-            });
+        @JavascriptInterface public void openUrl(String url) {
+            if (url == null || !url.startsWith("https://")) return;
+            runOnUiThread(() -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))));
         }
-        @JavascriptInterface public String takeSms() { return SmsReceiver.take(MainActivity.this); }
+        @JavascriptInterface public boolean hasNotifications() {
+            return Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+        @JavascriptInterface public void requestNotifications() {
+            if (Build.VERSION.SDK_INT >= 33) runOnUiThread(() -> requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 2));
+        }
+        @JavascriptInterface public String takeSms() { return SmsIntake.take(MainActivity.this); }
         @JavascriptInterface public void save(String name, String mime, String text) {
             try {
                 ContentValues v = new ContentValues();

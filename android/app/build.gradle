@@ -6,11 +6,9 @@ android {
         applicationId 'app.masrouf'
         minSdk 29
         targetSdk 34
-        versionCode 6
-        versionName '1.5'
+        versionCode 7
+        versionName '2.0'
     }
-    flavorDimensions 'sms'
-    productFlavors { full { dimension 'sms' }; lite { dimension 'sms'; applicationIdSuffix '' } }
     sourceSets { main { assets.srcDirs = ['../../masrouf'] } }
     packagingOptions { resources { excludes += ['/sw.js'] } }
     buildTypes { release { minifyEnabled false } }

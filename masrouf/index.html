@@ -190,6 +190,8 @@ details.card summary::-webkit-details-marker{display:none}
 .pki .ck{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--pri);opacity:0;flex:none}
 .pki.on{border-color:var(--pri);background:var(--pri-soft)}.pki.on b{font-weight:700}.pki.on .ck{opacity:1}
 .pki.all .pi{background:var(--pri-soft);color:var(--pri)}
+.stp{display:flex;gap:12px;align-items:flex-start;padding:9px 0;font-size:14px;line-height:1.7}.stp i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:13px}
+.stp.done i{background:var(--pri);color:#fff}.stp.done span{color:var(--mute)}
 .printhead{display:none}
 @media print{
   body{background:#fff;color:#000}.top,.tabs,.fab,.noprint,.toast,.seg,.nav button{display:none!important}
@@ -564,7 +566,7 @@ function viewMore() {
     ${row('arrow-left-right', 'العملة', esc(set.cur), 'currency')}
     ${row('hash', 'شكل الأرقام', set.digits === 'ar' ? '٠١٢٣' : '0123', 'digits')}
     ${row('moon-star', 'المظهر', themes[set.theme], 'theme')}
-    ${window.AndroidBridge ? (AndroidBridge.smsSupported() ? row('mail-check', 'قراءة رسائل البنك تلقائياً', AndroidBridge.hasSms() ? 'مفعّلة ✓' : 'غير مفعّلة', 'smsperm') : row('share-2', 'هذه النسخة لا تقرأ الرسائل تلقائياً، اضغط للتفاصيل', '', 'sharehelp')) : ''}
+    ${readerState() ? row('mail-check', 'قارئ رسائل البنك', {missing: 'غير مثبّت', installed: 'يحتاج تفعيل الإذن', active: 'يعمل ✓'}[readerState()], 'readerhelp') : ''}
     ${row('zap', 'تسجيل رسائل البنك مباشرة', set.auto ? 'مباشر' : 'بعد مراجعتي', 'autotoggle')}
     ${row('inbox', 'الرسائل والمراجعة', S.d.pending.length ? dg(S.d.pending.length) + ' بانتظارك' : '', 'goinbox')}
     ${row('clipboard-list', 'لصق رسالة بنك لتسجيلها', '', 'smspaste')}
@@ -586,7 +588,12 @@ function countUp(el) {
   requestAnimationFrame(step);
 }
 let OB = 0;
-function askSmsOnce() { if (window.AndroidBridge && AndroidBridge.smsSupported && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) { S.smsAsk = true; AndroidBridge.requestSms(); } }
+function readerState() { try { return window.AndroidBridge && AndroidBridge.readerState ? AndroidBridge.readerState() : null; } catch (e) { return null; } }
+const READER_URL = 'https://github.com/ibrahimgamaan/portal/raw/claude/expense-tracker-app-t8vce0/masrouf-reader.apk';
+function askSmsOnce() {
+  if (window.AndroidBridge && AndroidBridge.requestNotifications && !AndroidBridge.hasNotifications()) AndroidBridge.requestNotifications();
+  if (readerState() === 'missing') setTimeout(readerHelp, 600);
+}
 function onboard() {
   const slides = [['plus', 'سجّل مصروفك في ثوانٍ', 'اضغط + واكتب المبلغ على لوحة الأرقام، واختر الفئة، وانتهى. تستطيع الجمع والطرح مباشرة مثل 12+5.'],
     ['chart-column', 'تقارير تفهمك', 'تقارير يومية وأسبوعية وشهرية وسنوية بالرسوم، وقارن صرفك بالفترة السابقة وتابع ميزانيتك.'],
@@ -837,8 +844,9 @@ document.addEventListener('click', e => {
         S.d.tx.forEach(t => { if (t.cat === F.cid) t.cat = other.id; });
         S.d.cats = S.d.cats.filter(c => c.id !== F.cid); save(); catsSheet(); render(); }
       break; }
-    case 'smsperm': if (AndroidBridge.hasSms()) toast('القراءة التلقائية مفعّلة بالفعل'); else { S.smsAsk = true; AndroidBridge.requestSms(); } break;
-    case 'opensettings': AndroidBridge.openSettings(); break;
+    case 'readerhelp': readerHelp(); break;
+    case 'readerdl': AndroidBridge.openUrl(READER_URL); break;
+    case 'readeropen': if (!AndroidBridge.openReader()) toast('تطبيق القارئ غير مثبّت بعد'); break;
     case 'smspaste': promptSheet('لصق رسالة البنك', 'الصق نص الرسالة هنا', '', v => { closeSheet(); const r = ingestSms([{body: v, ts: Date.now(), sender: 'يدوي'}]); toast(r.pending ? 'أُضيفت للمراجعة' : r.maybe ? 'لم أجزم أنها عملية، راجعها في الرسائل' : r.auto ? 'سُجّلت العملية' : 'اعتبرتها رسالة غير مالية، تجدها في الرسائل المتجاهلة'); S.tab = 'inbox'; S.enter = true; render(); }); break;
     case 'autotoggle': set.auto = !set.auto; save(); render(); toast(set.auto ? 'الرسائل المعروفة الفئة تُسجَّل مباشرة، وغير المعروفة تنتظر مراجعتك' : 'كل الرسائل تنتظر مراجعتك'); break;
     case 'pickfc': openCatPick('تصفية حسب الفئة', S.f.cat, true, false, id => { S.f.cat = id; render(); }); break;
@@ -856,7 +864,6 @@ document.addEventListener('click', e => {
         S.d.rec.push({id: uid(), last: day <= n.getDate() ? `${n.getFullYear()}-${pad(n.getMonth() + 1)}` : `${pm.getFullYear()}-${pad(pm.getMonth() + 1)}`, ...rec}); }
       save(); runRecurring(); recsSheet(); render(); break; }
     case 'recdel': S.d.rec = S.d.rec.filter(r => r.id !== F.rid); save(); recsSheet(); render(); break;
-    case 'sharehelp': sheet(`<div class="sh"><b>القراءة التلقائية للرسائل</b><button class="x" data-act="close">✕</button></div><div class="card" style="line-height:2">النسخة المثبّتة عندك <b>لا تملك صلاحية قراءة الرسائل</b>، لذلك لا تسجّل شيئاً من تلقاء نفسها.<br>لتفعيل القراءة التلقائية ثبّت <b>النسخة الكاملة</b> (ملف <b>masrouf.apk</b> من الرابط الأساسي) فوق هذه النسخة.<br>وإلى ذلك الحين: افتح الرسالة ثم <b>مشاركة</b> واختر <b>مصروفي</b>.</div>`); break;
     case 'goinbox': S.tab = 'inbox'; S.enter = true; render(); scrollTo(0, 0); break;
     case 'mrec': { const x = S.d.maybe.find(y => y.id === D.id); openForm(null, {...x, type: x.type || 'exp', amount: x.amount || '', cat: x.cat || 'other', date: x.date || todayStr(), time: x.time || '', note: x.merchant || ''}); break; }
     case 'grec': { const x = S.d.ignored.find(y => y.id === D.id), r = SmsParser.parseLoose(x.body, x.ts) || {}; openForm(null, {id: x.id, type: r.type || 'exp', amount: r.amount || '', cat: r.cat || 'other', date: r.date || todayStr(), time: r.time || '', merchant: r.merchant || '', note: r.merchant || ''}); break; }
@@ -983,19 +990,25 @@ function pullSms() {
       if (r.auto) setTimeout(budgetCheck, 2400); } } catch (e) {}
   handleLaunch();
 }
-window.smsStatusChanged = () => { render(); pullSms(); handleLaunch(); if (S.smsAsk) { S.smsAsk = false; if (window.AndroidBridge && AndroidBridge.smsSupported() && !AndroidBridge.hasSms()) smsHelp(); else if (window.AndroidBridge && AndroidBridge.hasSms()) toast('تم تفعيل قراءة الرسائل ✓'); } };
-function smsHelp() {
-  sheet(`<div class="sh"><b>تفعيل قراءة الرسائل</b><button class="x" data-act="close">✕</button></div>
-    <div class="card" style="line-height:2"><b>إن لم تظهر نافذة الإذن أو رُفض، فاتّبع الخطوات:</b><br>
-    ١. اضغط الزر أدناه لفتح إعدادات التطبيق.<br>٢. اضغط على النقاط الثلاث في أعلى الشاشة واختر <b>السماح بالإعدادات المقيّدة</b>.<br>
-    ٣. ادخل إلى <b>الأذونات</b> ثم <b>الرسائل SMS</b> واختر <b>السماح</b>.<br>٤. عُد إلى مصروفي.</div>
-    <div class="btns"><button class="btn p" data-act="opensettings">فتح إعدادات التطبيق</button></div>`);
+window.smsStatusChanged = () => { render(); pullSms(); handleLaunch(); };
+function readerHelp() {
+  const st = readerState();
+  const step = (n, t, done) => `<div class="stp ${done ? 'done' : ''}"><i>${done ? ic('check-check', 16, 2.2) : n}</i><span>${t}</span></div>`;
+  sheet(`<div class="sh"><b>قارئ رسائل البنك</b><button class="x" data-act="close">✕</button></div>
+    <div class="hint" style="color:var(--mute);line-height:1.8;margin-bottom:10px">تطبيق صغير مستقل يقرأ رسائل البنك ويمرّرها إلى مصروفي. تثبّته <b>مرة واحدة فقط</b>، وبعدها <b>تحديث مصروفي لا يحتاج إيقاف الحماية</b>.</div>
+    <div class="card" style="padding:12px 14px">
+    ${step(1, 'نزّل تطبيق القارئ', st !== 'missing')}
+    ${step(2, 'ثبّته. أوقف Play Protect مؤقتاً أثناء هذا التثبيت فقط، ثم أعد تفعيله', st !== 'missing')}
+    ${step(3, 'افتح القارئ واضغط "تفعيل إذن قراءة الرسائل" (وإن لم تظهر النافذة فاتّبع الخطوات المكتوبة في شاشته)', st === 'active')}
+    ${step(4, 'عُد إلى مصروفي، وستصلك عمليات البنك للمراجعة', st === 'active')}</div>
+    ${st === 'active' ? '<div class="hint" style="margin:10px 4px;color:var(--pri);font-weight:600">القارئ يعمل الآن ✓</div>' : ''}
+    <div class="btns">${st === 'missing' ? '<button class="btn p" data-act="readerdl">تنزيل القارئ</button>' : st === 'installed' ? '<button class="btn p" data-act="readeropen">فتح القارئ وتفعيل الإذن</button>' : '<button class="btn" data-act="readeropen">فتح القارئ</button>'}</div>`);
 }
 function smsBanner() {
-  if (!window.AndroidBridge || !AndroidBridge.smsSupported || !AndroidBridge.smsSupported() || AndroidBridge.hasSms()) return '';
-  return `<section class="card pend"><h3>${ic('mail-check', 18)} فعّل قراءة رسائل البنك</h3><div class="hint" style="margin-bottom:10px">ليسجّل التطبيق عملياتك تلقائياً بمجرد وصول رسالة الخصم، ثم تراجعها وتؤكدها.</div><div class="btns"><button class="btn p" data-act="smsperm">تفعيل الآن</button></div></section>`;
+  const st = readerState(); if (!st || st === 'active') return '';
+  return `<section class="card pend"><h3>${ic('mail-check', 18)} ${st === 'missing' ? 'ثبّت قارئ رسائل البنك' : 'فعّل إذن القارئ'}</h3><div class="hint" style="margin-bottom:10px">${st === 'missing' ? 'تطبيق صغير يُثبَّت مرة واحدة ليسجّل عملياتك تلقائياً، وبعدها تتحدث نسخة مصروفي بدون أي حظر.' : 'القارئ مثبّت، افتحه وفعّل إذن الرسائل ليبدأ التسجيل.'}</div><div class="btns"><button class="btn p" data-act="readerhelp">${st === 'missing' ? 'كيف أثبّته؟' : 'التفعيل'}</button></div></section>`;
 }
-if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', pullSms); }
+if (window.AndroidBridge) { setInterval(() => { if (!document.hidden && !$('#layer').innerHTML) pullSms(); }, 4000); document.addEventListener('visibilitychange', () => { if (!document.hidden) { pullSms(); render(); } }); }
 
 /* بيانات تجريبية */
 function demo() {

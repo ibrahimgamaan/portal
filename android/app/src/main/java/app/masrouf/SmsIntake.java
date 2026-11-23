@@ -4,32 +4,24 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.provider.Telephony;
-import android.telephony.SmsMessage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.regex.Pattern;
 
-/** يستقبل الرسائل ويحفظ المالية منها فقط في طابور محلي؛ التحليل يتم داخل التطبيق. */
-public class SmsReceiver extends BroadcastReceiver {
+/** طابور الرسائل المالية المحوَّلة من تطبيق القارئ، وإشعار العمليات المؤكدة. التحليل الكامل داخل التطبيق. */
+final class SmsIntake {
     static final String PREFS = "sms", KEY = "q";
     static final Pattern FIN = Pattern.compile("(شراء|سحب|خصم|دفع|سداد|حوالة|تحويل|إيداع|ايداع|راتب|مبلغ|فاتورة|purchase|withdraw|debit|credit|payment|SAR|ريال|ر\\.?س)", Pattern.CASE_INSENSITIVE);
 
-    @Override public void onReceive(Context c, Intent i) {
-        if (!Telephony.Sms.Intents.SMS_RECEIVED_ACTION.equals(i.getAction())) return;
-        SmsMessage[] parts = Telephony.Sms.Intents.getMessagesFromIntent(i);
-        if (parts == null || parts.length == 0) return;
-        StringBuilder body = new StringBuilder();
-        for (SmsMessage m : parts) body.append(m.getMessageBody());
-        String text = body.toString();
-        if (!FIN.matcher(text).find()) return;   // رسائل غير مالية لا تُخزَّن إطلاقاً
+    /** تستدعيها ReaderReceiver عند وصول رسالة محوَّلة من تطبيق "قارئ مصروفي". */
+    static void intake(Context c, String sender, String text, long ts) {
+        if (text == null || !FIN.matcher(text).find()) return;   // رسائل غير مالية لا تُخزَّن إطلاقاً
         try {
             SmsClassifier k = SmsClassifier.of(text);
-            push(c, parts[0].getOriginatingAddress(), text, parts[0].getTimestampMillis(), k);
+            push(c, sender, text, ts, k);
             if (SmsClassifier.TXN.equals(k.kind)) notifyUser(c, k);   // إشعار للعمليات المؤكدة فقط
         } catch (Exception ignored) {}
     }
@@ -40,7 +32,7 @@ public class SmsReceiver extends BroadcastReceiver {
         o.put("sender", sender);
         o.put("body", text);
         o.put("ts", ts);
-        synchronized (SmsReceiver.class) {
+        synchronized (SmsIntake.class) {
             SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             JSONArray a = new JSONArray(sp.getString(KEY, "[]"));
             a.put(o);
@@ -51,7 +43,7 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     static String take(Context c) {
-        synchronized (SmsReceiver.class) {
+        synchronized (SmsIntake.class) {
             SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             String v = sp.getString(KEY, "[]");
             sp.edit().remove(KEY).putInt("n", 0).apply();
