@@ -1,7 +1,7 @@
 /* عامل خدمة بسيط لتطبيق البوابة: يجعل الصفحة قابلة للتثبيت ويحفظ غلافها وأيقوناتها.
    الصفحة نفسها تُطلب من الشبكة أولًا (لتصل التحديثات فورًا)، وتُستخدم النسخة المحفوظة فقط عند انقطاع الاتصال.
    لا يتدخل في طلبات Google (التطبيقات والبيانات تبقى مباشرة من الشبكة). */
-var CACHE = 'omq-portal-v1';
+var CACHE = 'omq-portal-v2';
 var SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', function (e) {

@@ -1,6 +1,6 @@
 {
   "id": "./",
-  "name": "عمق | طلبات الصرف ومتابعة الإنجاز",
+  "name": "بوابة عمق",
   "short_name": "عمق",
   "description": "طلبات الصرف ومتابعة نسب الإنجاز لمشاريع عمق العقارية",
   "lang": "ar",
@@ -9,7 +9,7 @@
   "scope": "./",
   "display": "standalone",
   "background_color": "#F3F6F6",
-  "theme_color": "#247B73",
+  "theme_color": "#193C3B",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
