@@ -22,7 +22,7 @@
   #fb .c { background: #fff; border: 1px solid #DCE5E8; border-radius: 14px; padding: 28px; max-width: 460px; width: 100%; text-align: center; line-height: 1.8; }
   #fb h1 { margin: 0 0 10px; font-size: 20px; }
   #fb p { margin: 0 0 18px; color: #5F7480; font-size: 15px; }
-  #fb a.b { display: block; background: #247B73; color: #fff; text-decoration: none; font-weight: 600; padding: 13px 20px; border-radius: 10px; }
+  #fb a.b { display: block; background: #193C3B; color: #fff; text-decoration: none; font-weight: 600; padding: 13px 20px; border-radius: 10px; }
   #fb button { margin-top: 12px; background: none; border: 0; color: #5F7480; cursor: pointer; font: inherit; font-size: 14px; text-decoration: underline; }
 </style>
 </head>
@@ -30,10 +30,9 @@
 <iframe id="app" title="عمق العقارية" allow="clipboard-write"></iframe>
 <div id="fb" role="alert">
   <div class="c">
-    <h1>تعذّر عرض الصفحة داخل هذا المتصفح</h1>
-    <p>قد يكون حساب Google غير مسجَّل الدخول في هذا المتصفح، أو أنه يمنع ملفات تعريف الارتباط لجهات خارجية. افتح الرابط الرسمي (سيظهر فيه شريط Google) وسجّل الدخول إن طُلب منك، ثم أعد فتح هذا الرابط ليعمل بلا شريط.</p>
-    <a class="b" id="fbLink" target="_top" rel="noopener">فتح الرابط الرسمي</a>
-    <button type="button" id="fbClose">متابعة الانتظار</button>
+    <h1>جاري الفتح بالرابط المباشر…</h1>
+    <p>هذا المتصفح لا يسمح بفتح الصفحة بالطريقة المعتادة، فسيُفتح الرابط المباشر (يظهر فيه شريط Google). سجّل الدخول بحساب Google إن طُلب منك.</p>
+    <a class="b" id="fbLink" target="_top" rel="noopener">فتح الآن</a>
   </div>
 </div>
 <script>
@@ -42,7 +41,7 @@
    OFFICIAL = الرابط الرسمي للبوابة (بلا تضمين) يُعرض كمخرج إن لم تصل رسالة «ready» من البوابة خلال مدة الانتظار. */
 var PORTAL = 'https://script.google.com/macros/s/AKfycbyeZHvAXK-rIe9Dl3XBg3dHJB1Dr2hmlUztwibulpVsQxvPBCszE5Y-ze0Qc9LzfieH/exec';
 var OFFICIAL = 'https://script.google.com/macros/s/AKfycbzkPixH6QvnJsOEwbVNRL-KD6UIPaw_-vUD7aNM0HjiDYyu_ZwX6N3Ki0m1b4QH1C1a/exec';
-var WAIT_MS = 15000;
+var WAIT_MS = 8000;
 var APPS = 'https://script.google.com/macros/s/';
 var SANDBOX = /^https:\/\/n-[a-z0-9-]+-script\.googleusercontent\.com$/;
 var frame = document.getElementById('app'), fb = document.getElementById('fb'), timer = null;
@@ -59,13 +58,31 @@ if (direct.indexOf(APPS) === 0) {
   var q = new URLSearchParams(location.search), p = new URLSearchParams(), o = new URLSearchParams();
   p.set('embed', '1');
   ['m', 'id'].forEach(function (k) { if (q.get(k)) { p.set(k, q.get(k)); o.set(k, q.get(k)); } });
-  frame.src = PORTAL + '?' + p.toString();
-  document.getElementById('fbLink').href = OFFICIAL + (o.toString() ? '?' + o.toString() : '');
-  timer = setTimeout(function () { fb.classList.add('on'); }, WAIT_MS);
+  var officialUrl = OFFICIAL + (o.toString() ? '?' + o.toString() : '');
+  document.getElementById('fbLink').href = officialUrl;
+  /* الأجهزة التي فشل فيها الإطار سابقًا (جوال لا يسمح بدخول Google داخل إطار) تفتح الرابط الرسمي مباشرة.
+     ?frame=1 يلغي هذا التذكر ويعيد تجربة الإطار. */
+  if (q.get('frame') === '1') store_(null);
+  if (store_() === '1') {
+    location.replace(officialUrl);
+  } else {
+    frame.src = PORTAL + '?' + p.toString();
+    timer = setTimeout(function () {
+      /* لم تستجب البوابة داخل الإطار: يتذكر الجهاز ذلك وينتقل إلى الرابط الرسمي تلقائيًا. */
+      store_('1');
+      fb.classList.add('on');
+      setTimeout(function () { location.replace(officialUrl); }, 1500);
+    }, WAIT_MS);
+  }
+}
+function store_(v) {
+  try {
+    if (v === undefined) return localStorage.getItem('omq-direct');
+    if (v === null) localStorage.removeItem('omq-direct'); else localStorage.setItem('omq-direct', v);
+  } catch (e) { return null; }
 }
 /* تسجيل عامل الخدمة ليُثبَّت الرابط كتطبيق على اللابتوب والجوال. */
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
-document.getElementById('fbClose').addEventListener('click', function () { fb.classList.remove('on'); });
 
 window.addEventListener('message', function (e) {
   var d = e.data;
